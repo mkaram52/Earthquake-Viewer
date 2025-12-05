@@ -1,0 +1,6 @@
+/Backend/venv
+/Frontend/.idea
+/Backend/EarthquakeViewer/.idea
+.DS_Store
+/Backend/.idea
+Backend/db.sqlite3
