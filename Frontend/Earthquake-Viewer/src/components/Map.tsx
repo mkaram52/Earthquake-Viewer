@@ -93,11 +93,11 @@ const Map = () => {
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
 
-    if (!selectedEarthquake) {
-      dispatch(startFiltering());
-      const currentCenter = mapRef.current.getCenter();
-      mapRef.current!.flyTo({center: currentCenter, zoom: 5, duration: 1000});
-    } else {
+    if (selectedEarthquake) {
+    //   dispatch(startFiltering());
+    //   const currentCenter = mapRef.current.getCenter();
+    //   mapRef.current!.flyTo({center: currentCenter, zoom: 5, duration: 1000});
+    // } else {
       dispatch(startFiltering());
       mapRef.current!.flyTo({center: [selectedEarthquake.longitude, selectedEarthquake.latitude], zoom: 13, duration: 1000});
     }

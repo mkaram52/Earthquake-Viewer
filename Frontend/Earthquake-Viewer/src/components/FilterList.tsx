@@ -8,6 +8,7 @@ import {
   HStack,
 } from "@chakra-ui/react";
 import { Select } from "chakra-react-select";
+import StyledSelect from "./common/StyledSelect.tsx";
 import {
   selectInViewEarthquakes,
   selectEarthquake,
@@ -16,7 +17,9 @@ import {
   selectIsFiltering,
   selectCountryOptions,
   selectCountryFilter,
+  selectMagnitudeFilter,
   setCountry,
+  setMagnitude,
 } from "../state/slices/Earthquakes.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
@@ -28,69 +31,38 @@ const FilterList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const countryList = useSelector(selectCountryOptions);
   const selectedCountry = useSelector(selectCountryFilter);
+  const selectedMagnitude = useSelector(selectMagnitudeFilter);
 
   const countryOptions = countryList.map((country) => ({
     value: country,
     label: country,
   }));
 
+  const magnitudeOptions = [
+    {value: 3, label: "3+"},
+    {value: 4, label: "4+"},
+    {value: 5, label: "5+"},
+    {value: 6, label: "6+"},
+  ]
+
+  const selectedOption = magnitudeOptions.find((option) => option.value === selectedMagnitude);
+
   return (
-    <VStack align="stretch" width="100%">
-      <>
-        <Select
-          name="country"
-          options={countryOptions}
-          placeholder="Select Country"
-          isClearable={true}
-          useBasicStyles
-          value={selectedCountry ? {value: selectedCountry, label: selectedCountry} : null}
-          onChange={(value) => dispatch(setCountry(value?.value))}
-          chakraStyles={{
-            control: (provided) => ({
-              ...provided,
-              cursor: "pointer",
-              fontSize: "sm",
-              fontWeight: "500",
-            }),
-            option: (provided, state) => ({
-              ...provided,
-              fontSize: "sm",
-              fontWeight: "500",
-              backgroundColor: state.isSelected 
-                ? "gray.700" 
-                : state.isFocused 
-                  ? "gray.600" 
-                  : "gray.800",
-              color: "white",
-              _hover: {
-                backgroundColor: "gray.600",
-              },
-            }),
-            menu: (provided) => ({
-              ...provided,
-              fontSize: "sm",
-              fontWeight: "500",
-              backgroundColor: "gray.800",
-            }),
-            menuList: (provided) => ({
-              ...provided,
-              backgroundColor: "gray.800",
-            }),
-            singleValue: (provided) => ({
-              ...provided,
-              fontSize: "sm",
-              fontWeight: "500",
-              color: "white",
-            }),
-            placeholder: (provided) => ({
-              ...provided,
-              fontSize: "sm",
-              fontWeight: "500",
-              color: "gray.400",
-            }),
-          }}
-        />
-      </>
+    <VStack align="stretch" width="100%" spacing={2}>
+      <StyledSelect
+        name="country"
+        options={countryOptions}
+        placeholder="Select Country"
+        value={selectedCountry ? {value: selectedCountry, label: selectedCountry} : null}
+        onChange={(value) => dispatch(setCountry(value?.value))}
+      />
+      <StyledSelect
+        name="magnitude"
+        options={magnitudeOptions}
+        placeholder="Select Magnitude Range"
+        value={selectedMagnitude ? selectedOption : null}
+        onChange={(value) => dispatch(setMagnitude(value?.value))}
+      />
     </VStack>
   )
 };

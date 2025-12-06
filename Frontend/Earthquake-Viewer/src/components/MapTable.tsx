@@ -49,17 +49,6 @@ const MapTable = () => {
     );
   }
 
-  // Show empty state
-  if (filteredEarthquakes?.length === 0) {
-    return (
-      <Center py={8}>
-        <Text color="gray.500">
-          No Earthquakes Found
-        </Text>
-      </Center>
-    );
-  }
-
   const Section = () => {
     if (listOpen) {
       return <EarthquakeList/>;

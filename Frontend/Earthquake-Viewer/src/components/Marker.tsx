@@ -12,6 +12,9 @@ import {
   clearSelectedEarthquake,
   selectSelectedEarthquake,
 } from "../state/slices/Earthquakes.ts";
+import {
+  openList
+} from "../state/slices/Table.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
 import { getMagnitudeColorHex } from "../utils/magnitudeColors.ts";
@@ -41,6 +44,7 @@ const Marker: React.FC<MarkerProps> = ({
       dispatch(clearSelectedEarthquake());
     } else {
       dispatch(selectEarthquake(earthquake));
+      dispatch(openList());
     }
   }
 
