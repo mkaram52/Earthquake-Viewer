@@ -57,7 +57,7 @@ const Marker: React.FC<MarkerProps> = ({
       markerRef.current?.remove()
     }
   }, [])
-// AIzaSyA11gialtmUtD5XoYmhU-X775B3CU-LVvM
+
   return (
     <>
       {createPortal(
@@ -73,7 +73,8 @@ const Marker: React.FC<MarkerProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            cursor: 'pointer'
+            cursor: 'pointer',
+            border: '2px solid black'
           }}
         >
           {isSelected ? (

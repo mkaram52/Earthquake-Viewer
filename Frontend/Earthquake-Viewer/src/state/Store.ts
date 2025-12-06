@@ -1,9 +1,11 @@
 import { configureStore } from "@reduxjs/toolkit";
 import earthquakesReducer from './slices/Earthquakes.ts'
+import tableReducer from './slices/Table.ts'
 
 const store = configureStore({
   reducer: {
     earthquakes: earthquakesReducer,
+    table: tableReducer,
   },
 });
 

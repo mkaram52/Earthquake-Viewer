@@ -1,27 +1,26 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react'
 import {
-  Grid,
-  GridItem,
   Box,
-  Text,
-  Center,
-  VStack,
-  Spinner,
 } from '@chakra-ui/react'
 import mapboxgl from 'mapbox-gl'
-import {type Earthquake, fetchEarthquakes} from "../api/earthquakes.ts";
 import { useSelector, useDispatch } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
 import Marker from "./Marker.tsx";
 import MapTable from "./MapTable.tsx";
+import MapButtonMenu from "./MapButtonMenu.tsx";
+import { boundingBorders } from "../utils/countries.ts";
 import {
-  setFilteredEarthquakes,
+  setInViewEarthquakes,
   selectSelectedEarthquake,
   selectIsFiltering,
   selectEarthquakes,
   startFiltering,
   stopFiltering,
+  selectCountryFilter,
 } from "../state/slices/Earthquakes.ts";
+import {
+  selectIsOpen,
+} from "../state/slices/Table.ts"
 
 import 'mapbox-gl/dist/mapbox-gl.css'
 
@@ -32,6 +31,8 @@ const Map = () => {
   const [mapLoaded, setMapLoaded] = useState(false)
   const selectedEarthquake = useSelector(selectSelectedEarthquake);
   const earthquakes = useSelector(selectEarthquakes);
+  const isTableOpen = useSelector(selectIsOpen);
+  const selectedCountry = useSelector(selectCountryFilter);
 
   useEffect(() => {
     // Set your Mapbox access token
@@ -40,7 +41,7 @@ const Map = () => {
     if (!mapRef.current && mapContainerRef.current) {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
-        style: 'mapbox://styles/mapbox/dark-v11',
+        style: 'mapbox://styles/mapbox/navigation-night-v1',
         center: [-80, 40], // Pittsburgh
         zoom: 4,
       });
@@ -67,7 +68,7 @@ const Map = () => {
       const eqLngLat: [number, number] = [eq.longitude, eq.latitude];
       if (bounds.contains(eqLngLat)) return true;
     })
-    dispatch(setFilteredEarthquakes(visibleEarthquakes || []));
+    dispatch(setInViewEarthquakes(visibleEarthquakes || []));
     dispatch(stopFiltering());
   }, [earthquakes, dispatch]);
 
@@ -102,23 +103,75 @@ const Map = () => {
     }
   },[selectedEarthquake])
 
+  // Resize map when table opens/closes - wait for animation to complete
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return;
+    
+    // Wait for animation to complete (300ms) plus a small buffer
+    const timeoutId = setTimeout(() => {
+      mapRef.current?.resize();
+    }, 350);
+
+    return () => clearTimeout(timeoutId);
+  }, [isTableOpen, mapLoaded])
+
+  useEffect(() => {
+    if (!mapRef.current || !mapLoaded) return;
+
+    if (selectedCountry) {
+      if (boundingBorders.has(selectedCountry)) {
+        const borders = boundingBorders.get(selectedCountry);
+        if (borders) {
+          mapRef.current.fitBounds(
+            [
+              [borders[0], borders[1]], // Southwest coordinates
+              [borders[2], borders[3]]  // Northeast coordinates
+            ],
+            {
+              padding: 20,
+              duration: 2000,
+            }
+          );
+        }
+      }
+    }
+  }, [selectedCountry])
+
   return (
-    <Box h="100%" w="100%">
-      <Grid templateColumns="1fr 3fr" h="100%" w="100%">
-        <GridItem p={4} overflowY="auto" h="100%">
+    <Box h="100%" w="100%" position="relative" display="flex">
+      {/* Table sidebar with animation */}
+      <Box
+        w={isTableOpen ? "25%" : "0%"}
+        maxW={isTableOpen ? "25%" : "0%"}
+        h="100%"
+        overflow="hidden"
+        opacity={isTableOpen ? 1 : 0}
+        transition="all 0.3s ease-in-out"
+        flexShrink={0}
+      >
+        <Box p={4} overflowY="auto" h="100%" w="100%">
           <MapTable />
-        </GridItem>
-        <GridItem h="100%" w="100%">
-          <div style={{ width: '100%', height: '100%' }} ref={mapContainerRef} />
-          {mapLoaded && mapRef.current && earthquakes.map((eq) => (
-            <Marker
-              key={eq.earthquake_id}
-              earthquake={eq}
-              map={mapRef.current!}
-            />
-          ))}
-        </GridItem>
-      </Grid>
+        </Box>
+      </Box>
+      
+      {/* Map container */}
+      <Box
+        flex="1"
+        h="100%"
+        w="100%"
+        position="relative"
+        transition="all 0.3s ease-in-out"
+      >
+        <div style={{ width: '100%', height: '100%' }} ref={mapContainerRef} />
+        <MapButtonMenu />
+        {mapLoaded && mapRef.current && earthquakes.map((eq) => (
+          <Marker
+            key={eq.earthquake_id}
+            earthquake={eq}
+            map={mapRef.current!}
+          />
+        ))}
+      </Box>
     </Box>
   )
 }
