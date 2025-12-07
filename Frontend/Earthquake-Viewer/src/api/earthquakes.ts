@@ -2,6 +2,7 @@ import axios from 'axios'
 
 export interface Earthquake {
   earthquake_id: string | number;
+  place: string;
   time: string;
   latitude: number;
   longitude: number;

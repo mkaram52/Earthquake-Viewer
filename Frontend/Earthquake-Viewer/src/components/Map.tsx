@@ -59,7 +59,12 @@ const Map = () => {
 
   const checkVisibleMarkers = useCallback(() => {
     dispatch(startFiltering());
-    if (!mapRef.current || !earthquakes || earthquakes.length === 0) return;
+    if (!mapRef.current) return;
+    if (!earthquakes || earthquakes.length === 0) {
+      dispatch(setInViewEarthquakes([]));
+      dispatch(stopFiltering());
+      return;
+    }
 
     const bounds = mapRef.current.getBounds();
     if (!bounds) return;
@@ -164,7 +169,7 @@ const Map = () => {
       >
         <div style={{ width: '100%', height: '100%' }} ref={mapContainerRef} />
         <MapButtonMenu />
-        {mapLoaded && mapRef.current && earthquakes.map((eq) => (
+        {mapLoaded && mapRef.current && [...earthquakes].reverse().map((eq) => (
           <Marker
             key={eq.earthquake_id}
             earthquake={eq}

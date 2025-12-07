@@ -29,6 +29,7 @@ def get_earthquakes():
         Earthquake.objects.create(
             earthquake_id=row[11],
             time=row[0],
+            place=row[13],
             latitude=row[1],
             longitude=row[2],
             depth=row[3],

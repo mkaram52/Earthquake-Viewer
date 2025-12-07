@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React from 'react'
 import {
   Box,
   VStack,
@@ -15,7 +15,6 @@ import {
 } from "../state/slices/Earthquakes.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
-import moment from 'moment';
 import { type Earthquake } from "../api/earthquakes.ts";
 import { getMagnitudeColorToken } from "../utils/magnitudeColors.ts";
 
@@ -71,7 +70,10 @@ const EarthquakeList = () => {
         const selected = selectedEarthquake && eq.earthquake_id === selectedEarthquake.earthquake_id;
         const selectedColor = getMagnitudeColorToken(eq.magnitude)
         const bgColor = index % 2 === 0 ? "white" : "gray.50";
-        const formattedTime = moment(eq.time).format('MMMM Do YYYY, h:mm:ss a');
+
+        const date = new Date(eq.time);
+        // TO-DO : Format Date Better
+        const formattedDate = date.toLocaleString('en-US', { timeZone: 'America/New_York' })
         return (
           <Box key={eq.earthquake_id} bg={bgColor} width="100%">
             <Box
@@ -82,27 +84,25 @@ const EarthquakeList = () => {
               bg={bgColor}
               p={3}
               cursor="pointer"
-              // TO-DO : Add Hover Coloring
-              _hover={{ bg: selected ? selectedColor : "gray.100" }}
+              // TO-DO : Add Hover Coloring to Marker
+              _hover={{ bg: "gray.200" }}
               transition="background-color 0.2s"
               onClick={() => handleSelectEarthquake(eq)}
               position="relative"
             >
               <HStack spacing={2} justifyContent="space-between">
                 <VStack align="stretch">
+                  <Text fontSize="sm" fontWeight={600} color="blue.500">
+                    <a href={`https://earthquake.usgs.gov/earthquakes/eventpage/${eq.earthquake_id}/executive`} target="_blank">
+                      {eq.place}
+                    </a>
+                  </Text>
                   <Text fontSize="xs" fontWeight={500} color="blue.500">
-                    {formattedTime}
+                    {formattedDate}
                   </Text>
                   <Text fontSize="xs" fontWeight={500} color="gray.500">
                     {eq.magnitude.toFixed(2)} magnitude
                   </Text>
-                </VStack>
-                <VStack justifyContent="center">
-                  {eq.country && (
-                    <Text fontSize="xl" fontWeight={1000} color="gray.500">
-                      {eq.country}
-                    </Text>
-                  )}
                 </VStack>
               </HStack>
             </Box>

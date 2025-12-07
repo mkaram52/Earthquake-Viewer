@@ -4,6 +4,7 @@ from django.utils import timezone
 
 class Earthquake(models.Model):
     earthquake_id = models.CharField(max_length=256)
+    place = models.CharField(max_length=256, default="")
     time = models.DateTimeField(null=False, blank=False)
     depth = models.FloatField(default=0)
     magnitude = models.FloatField(default=0)
