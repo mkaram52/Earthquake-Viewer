@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react'
+import React, { useMemo } from 'react'
 import {
   Box,
   VStack,
@@ -14,19 +14,18 @@ import {
 import {
   selectListOpen,
   selectGraphOpen,
-  selectFilterOpen
+  selectFilterOpen,
+  selectIsOpen,
 } from "../state/slices/Table.ts";
-import { useDispatch, useSelector } from "react-redux";
-import EarthquakeList from "./EarthquakeList.tsx";
-import FilterList from "./FilterList.tsx";
+import { useSelector } from "react-redux";
+import MapTableSection from "./MapTableSection.tsx";
 
 const MapTable = () => {
-  const filteredEarthquakes = useSelector(selectInViewEarthquakes);
   const isFiltering = useSelector(selectIsFiltering);
   const listOpen = useSelector(selectListOpen);
   const filterOpen = useSelector(selectFilterOpen);
   const graphOpen = useSelector(selectGraphOpen);
-
+  const isOpen = useSelector(selectIsOpen);
 
   if (isFiltering) {
     return (
@@ -49,56 +48,6 @@ const MapTable = () => {
     );
   }
 
-  const Section = () => {
-    if (listOpen) {
-      return (
-        <Box
-          display="flex"
-          flexDirection="column"
-          height="100%"
-          width="100%"
-        >
-          {filterOpen && (
-            <Box
-              position="sticky"
-              top={0}
-              zIndex={10}
-              width="100%"
-              flexShrink={0}
-              marginBottom={4}
-              borderBottom="1px solid"
-              borderColor="gray.200"
-              boxShadow="sm"
-            >
-              <FilterList/>
-            </Box>
-          )}
-          <Box
-            flex="1"
-            overflowY="auto"
-            width="100%"
-            paddingTop={1}
-            css={{
-              "&::-webkit-scrollbar": {
-                display: "none",
-              },
-            }}
-          >
-            <EarthquakeList/>
-          </Box>
-        </Box>
-      )
-    } else {
-      return (
-        <Center py={8}>
-          <Text color="gray.500">
-            No Page Found
-          </Text>
-        </Center>
-      )
-    }
-  }
-
   return (
     <Box
       width="100%"
@@ -107,7 +56,12 @@ const MapTable = () => {
       maxHeight="100%"
       overflow="hidden"
     >
-      {Section()}
+      <MapTableSection
+        isOpen={isOpen}
+        listOpen={listOpen}
+        graphOpen={graphOpen}
+        filterOpen={filterOpen}
+      />
     </Box>
   )
 }

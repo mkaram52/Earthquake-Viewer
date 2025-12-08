@@ -11,6 +11,7 @@ import {
   selectEarthquake,
   clearSelectedEarthquake,
   selectSelectedEarthquake,
+  selectMagnitudeHover,
 } from "../state/slices/Earthquakes.ts";
 import {
   openList
@@ -37,6 +38,7 @@ const Marker: React.FC<MarkerProps> = ({
   const contentRef = useRef(document.createElement("div"));
   const markerRef = useRef<mapboxgl.Marker | null>(null)
   const selectedEarthquake = useSelector(selectSelectedEarthquake);
+  const magnitudeHover = useSelector(selectMagnitudeHover);
   const isSelected = selectedEarthquake && earthquake.earthquake_id === selectedEarthquake.earthquake_id;
 
   const handleSelectEarthquake = (earthquake: Earthquake) => {
@@ -60,7 +62,13 @@ const Marker: React.FC<MarkerProps> = ({
     return () => {
       markerRef.current?.remove()
     }
-  }, [])
+  }, []);
+
+  const display = () => {
+    if (!magnitudeHover) return 'flex';
+    if (Math.floor(earthquake.magnitude) === magnitudeHover) return 'flex';
+    return 'none';
+  };
 
   return (
     <>
@@ -74,7 +82,7 @@ const Marker: React.FC<MarkerProps> = ({
             borderRadius: '50%',
             width: '40px',
             height: '40px',
-            display: 'flex',
+            display: display(),
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',

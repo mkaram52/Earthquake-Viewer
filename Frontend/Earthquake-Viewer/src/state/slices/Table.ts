@@ -19,7 +19,6 @@ const tableSlice = createSlice({
   reducers: {
     openList: (state) => {
       state.graphOpen = false;
-      state.filterOpen = false;
       state.listOpen = true;
     },
     closeList: (state) => {
@@ -27,7 +26,6 @@ const tableSlice = createSlice({
       state.filterOpen = false;
     },
     openGraph: (state) => {
-      state.filterOpen = false;
       state.listOpen = false;
       state.graphOpen = true;
     },

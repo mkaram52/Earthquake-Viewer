@@ -13,52 +13,56 @@ import {
   selectIsFiltering,
   selectCountryOptions,
   selectCountryFilter,
-  selectMagnitudeFilter,
+  selectMagnitudeRangeFilter,
   selectHourFilter,
   selectSortOption,
+  startFiltering,
+  stopFiltering,
   sortByMagnitude,
   sortByTime,
   sortByCountry,
   setCountry,
-  setMagnitude,
+  setMagnitudeRange,
   setHours,
 } from "../state/slices/Earthquakes.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
 
+const magnitudeOptions = [
+  {value: 3, label: "3+"},
+  {value: 4, label: "4+"},
+  {value: 5, label: "5+"},
+  {value: 6, label: "6+"},
+] as const;
+
+const timeOptions = [
+  {value: 1, label: "last hour"},
+  {value: 12, label: "last 12 hours"},
+  {value: 24, label: "last day"},
+  {value: 48, label: "last 2 days"},
+  {value: 72, label: "last 3 days"},
+] as const;
+
+const sortOptions = [
+  {value: "magnitude", label: "Magnitude"},
+  {value: "time", label: "Time"},
+  {value: "country", label: "Country"},
+] as const;
+
 const FilterList = () => {
   const dispatch = useDispatch<AppDispatch>();
   const countryList = useSelector(selectCountryOptions);
   const selectedCountry = useSelector(selectCountryFilter);
-  const selectedMagnitude = useSelector(selectMagnitudeFilter);
+  const selectedMagnitude = useSelector(selectMagnitudeRangeFilter);
   const selectedHour = useSelector(selectHourFilter);
   const selectedSort = useSelector(selectSortOption);
 
-  const countryOptions = countryList.map((country) => ({
-    value: country,
-    label: country,
-  }));
-
-  const magnitudeOptions = [
-    {value: 3, label: "3+"},
-    {value: 4, label: "4+"},
-    {value: 5, label: "5+"},
-    {value: 6, label: "6+"},
-  ]
-
-  const timeOptions = [
-    {value: 1, label: "last hour"},
-    {value: 12, label: "last 12 hours"},
-    {value: 24, label: "last day"},
-    {value: 48, label: "last 2 days"},
-    {value: 72, label: "last 3 days"},
-  ]
-
-  const sortOptions = [
-    {value: "magnitude", label: "Magnitude"},
-    {value: "time", label: "Time"},
-    {value: "country", label: "Country"},
-  ]
+  const countryOptions = useMemo(() => {
+    return countryList.map((country) => ({
+      value: country,
+      label: country,
+    }));
+  }, [countryList]);
 
   const handleSort = (type: string) => {
     if (type === "magnitude") {
@@ -95,7 +99,7 @@ const FilterList = () => {
             options={magnitudeOptions}
             placeholder="Select Magnitude Range"
             value={selectedMagnitude ? selectedMagOption : null}
-            onChange={(value) => dispatch(setMagnitude(value?.value))}
+            onChange={(value) => dispatch(setMagnitudeRange(value?.value))}
           />
           <StyledSelect
             name="hours"
@@ -127,4 +131,4 @@ const FilterList = () => {
   )
 };
 
-export default FilterList;
+export default React.memo(FilterList);
