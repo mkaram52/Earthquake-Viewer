@@ -65,7 +65,7 @@ const MapTable = () => {
               zIndex={10}
               width="100%"
               flexShrink={0}
-              paddingBottom={2}
+              marginBottom={4}
               borderBottom="1px solid"
               borderColor="gray.200"
               boxShadow="sm"
@@ -77,6 +77,12 @@ const MapTable = () => {
             flex="1"
             overflowY="auto"
             width="100%"
+            paddingTop={1}
+            css={{
+              "&::-webkit-scrollbar": {
+                display: "none",
+              },
+            }}
           >
             <EarthquakeList/>
           </Box>

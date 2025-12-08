@@ -18,6 +18,7 @@ import {
   selectSortOption,
   sortByMagnitude,
   sortByTime,
+  sortByCountry,
   setCountry,
   setMagnitude,
   setHours,
@@ -56,6 +57,7 @@ const FilterList = () => {
   const sortOptions = [
     {value: "magnitude", label: "Magnitude"},
     {value: "time", label: "Time"},
+    {value: "country", label: "Country"},
   ]
 
   const handleSort = (type: string) => {
@@ -63,6 +65,8 @@ const FilterList = () => {
       dispatch(sortByMagnitude());
     } else if (type === "time") {
       dispatch(sortByTime());
+    } else if (type === "country") {
+      dispatch(sortByCountry());
     }
   }
 

@@ -176,6 +176,30 @@ const earthquakesSlice = createSlice({
       state.earthquakes = sortedEarthquakes;
       state.filteredEarthquakes = sortedFilteredEarthquakes;
     },
+    sortByCountry: (state) => {
+      state.sort = "country";
+      const sortedEarthquakes = state.earthquakes.sort(
+        (a, b) => {
+          if (!a.country) return 1;
+          else if (!b.country) return -1;
+          else {
+            return a.country.localeCompare(b.country);
+          }
+        }
+      );
+      const sortedFilteredEarthquakes = state.filteredEarthquakes.sort(
+        (a, b) => {
+          if (!a.country) return 1;
+          else if (!b.country) return -1;
+          else {
+            return a.country.localeCompare(b.country);
+          }
+        }
+      );
+
+      state.earthquakes = sortedEarthquakes;
+      state.filteredEarthquakes = sortedFilteredEarthquakes;
+    },
     selectEarthquake: (state, action: PayloadAction<Earthquake>) => {
       state.selectedEarthquake = action.payload;
     },
@@ -206,6 +230,7 @@ export const {
 
   sortByMagnitude,
   sortByTime,
+  sortByCountry
 } = earthquakesSlice.actions;
 
 export const selectInViewEarthquakes = (state: RootState) => state.earthquakes.inViewEarthquakes;
@@ -220,4 +245,15 @@ export const selectSortOption = (state: RootState) => state.earthquakes.sort;
 
 export const selectCountryOptions = (state: RootState) => [...new Set(state.earthquakes.earthquakes.map(earthquake => earthquake.country))].filter(Boolean);
 
+export const selectSelectedFirstEarthquakes = (state: RootState) => {
+  let earthquakes = [...state.earthquakes.inViewEarthquakes];
+  if (state.earthquakes.selectedEarthquake) {
+    earthquakes = earthquakes.sort((a, b) => {
+      if (a.earthquake_id === state.earthquakes.selectedEarthquake?.earthquake_id) return -1;
+      if (b.earthquake_id === state.earthquakes.selectedEarthquake?.earthquake_id) return 1;
+      return 0;
+    })
+  }
+  return earthquakes;
+};
 export default earthquakesSlice.reducer;

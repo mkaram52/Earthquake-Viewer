@@ -4,3 +4,11 @@
 .DS_Store
 /Backend/.idea
 Backend/db.sqlite3
+/Backend/earthquakes/__pycache__
+/Backend/earthquakes/management/__pycache__
+/Backend/earthquakes/management/commands/__pycache__
+/Backend/earthquakes/migrations/__pycache__
+/Backend/EarthquakeViewer/__pycache__
+/earthquake-viewer/Lib
+/Frontend/node_modules
+/earthquake-viewer

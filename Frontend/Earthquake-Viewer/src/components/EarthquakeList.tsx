@@ -6,12 +6,17 @@ import {
   Center,
   Spinner,
   HStack,
+  Stack,
+  StackSeparator,
+  Card,
 } from "@chakra-ui/react";
 import {
   selectInViewEarthquakes,
   selectEarthquake,
   clearSelectedEarthquake,
-  selectSelectedEarthquake, selectIsFiltering,
+  selectSelectedEarthquake,
+  selectIsFiltering,
+  selectSelectedFirstEarthquakes,
 } from "../state/slices/Earthquakes.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
@@ -20,7 +25,7 @@ import { getMagnitudeColorToken } from "../utils/magnitudeColors.ts";
 
 const EarthquakeList = () => {
   const dispatch = useDispatch<AppDispatch>();
-  const filteredEarthquakes = useSelector(selectInViewEarthquakes);
+  const filteredEarthquakes = useSelector(selectSelectedFirstEarthquakes);
   const selectedEarthquake = useSelector(selectSelectedEarthquake);
   const isFiltering = useSelector(selectIsFiltering);
 
@@ -68,45 +73,130 @@ const EarthquakeList = () => {
     <VStack align="stretch" width="100%">
       {filteredEarthquakes.map((eq: Earthquake, index: number) => {
         const selected = selectedEarthquake && eq.earthquake_id === selectedEarthquake.earthquake_id;
-        const selectedColor = getMagnitudeColorToken(eq.magnitude)
+        const magColor = getMagnitudeColorToken(eq.magnitude)
         const bgColor = index % 2 === 0 ? "white" : "gray.50";
 
         const date = new Date(eq.time);
         // TO-DO : Format Date Better
-        const formattedDate = date.toLocaleString('en-US', { timeZone: 'America/New_York' })
+        const formattedDate = date.toLocaleString(
+          'en-US',
+          { year: 'numeric', month: 'short', day: 'numeric', timeZone: 'America/New_York' }
+        );
+        const time = date.toLocaleTimeString(
+          'en-US',
+          { timeStyle: 'short', timeZone: 'America/New_York' }
+        );
+
         return (
-          <Box key={eq.earthquake_id} bg={bgColor} width="100%">
-            <Box
-              // TO-DO : Make a way of showing what's selected in the table
-              w="100%"
-              borderLeft="10px solid"
-              borderColor={selectedColor}
-              bg={bgColor}
-              p={3}
-              cursor="pointer"
-              // TO-DO : Add Hover Coloring to Marker
-              _hover={{ bg: "gray.200" }}
-              transition="background-color 0.2s"
-              onClick={() => handleSelectEarthquake(eq)}
-              position="relative"
-            >
-              <HStack spacing={2} justifyContent="space-between">
-                <VStack align="stretch">
-                  <Text fontSize="sm" fontWeight={600} color="blue.500">
-                    <a href={`https://earthquake.usgs.gov/earthquakes/eventpage/${eq.earthquake_id}/executive`} target="_blank">
+          <Card.Root
+            variant="outline"
+            bg={"gray.800"}
+            borderColor={"gray.700"}
+            borderRadius="lg"
+            overflow="hidden"
+            _hover={{ borderColor: magColor, transform: "translateY(-1px)", shadow: "md" }}
+            onClick={() => handleSelectEarthquake(eq)}
+            transition="all 0.15s ease-out"
+            w="100%"
+          >
+            <HStack align="stretch">
+              <Box
+                w="6px"
+                bg={magColor}
+                flexShrink={0}
+              />
+              <Card.Body p={3}>
+                <VStack separator={<StackSeparator />} align="flex-start">
+                  <VStack align="flex-start">
+                    <Text
+                      fontSize="16px"
+                      fontWeight="medium"
+                      textAlign="left"
+                      lineHeight="1.2"
+                      mb={1}
+                      color="white"
+                    >
                       {eq.place}
-                    </a>
-                  </Text>
-                  <Text fontSize="xs" fontWeight={500} color="blue.500">
-                    {formattedDate}
-                  </Text>
-                  <Text fontSize="xs" fontWeight={500} color="gray.500">
-                    {eq.magnitude.toFixed(2)} magnitude
-                  </Text>
+                    </Text>
+                    <Text
+                      fontSize="13px"
+                      color="gray.400"
+                      textAlign="left"
+                      lineHeight="1.2"
+                    >
+                      {formattedDate} • {time}
+                    </Text>
+                  </VStack>
+                  {selected && (
+                    <VStack align="flex-start">
+                      <HStack>
+                        <Text
+                          fontSize="13px"
+                          textAlign="left"
+                          lineHeight="1.2"
+                          mb={1}
+                          color="white"
+                        >
+                          Magnitude: {eq.magnitude.toFixed(2)}
+                        </Text>
+                        <Text
+                          fontSize="13px"
+                          textAlign="left"
+                          lineHeight="1.2"
+                          mb={1}
+                          color="white"
+                        >
+                          Depth: {eq.depth.toFixed(2)} km
+                        </Text>
+                      </HStack>
+                      <HStack>
+                        <Text
+                          fontSize="13px"
+                          textAlign="left"
+                          lineHeight="1.2"
+                          mb={1}
+                          color="white"
+                        >
+                          {eq.latitude.toFixed(2)}°, {eq.longitude.toFixed(2)}°
+                        </Text>
+                        {eq.country && (
+                          <HStack>
+                            <Text
+                              fontSize="13px"
+                              textAlign="left"
+                              lineHeight="1.2"
+                              mb={1}
+                              color="white"
+                            >
+                              •
+                            </Text>
+                            <Text
+                              fontSize="13px"
+                              textAlign="left"
+                              lineHeight="1.2"
+                              mb={1}
+                              color="white"
+                            >
+                              {eq.country}
+                            </Text>
+                          </HStack>
+                        )}
+                      </HStack>
+                      <Text fontSize="11px" color="blue.500">
+                        <a 
+                          href={`https://earthquake.usgs.gov/earthquakes/eventpage/${eq.earthquake_id}/executive`} 
+                          target="_blank"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          Learn More
+                        </a>
+                      </Text>
+                    </VStack>
+                  )}
                 </VStack>
-              </HStack>
-            </Box>
-          </Box>
+              </Card.Body>
+            </HStack>
+          </Card.Root>
         )
       })}
     </VStack>

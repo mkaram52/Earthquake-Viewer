@@ -16,14 +16,18 @@ def get_earthquakes():
     response = requests.get(url)
     response.raise_for_status()
 
+    last_earthquake = Earthquake.objects.all().order_by("-time").first()
 
     # Use io.StringIO to treat the string content as a file
     csv_data = io.StringIO(response.text)
     reader = csv.reader(csv_data)
 
     data = list(reader)
+    counter = 0
 
     for row in data[1:]:
+        if row[11] == last_earthquake.earthquake_id:
+            return counter
         latlng = row[1] + "," + row[2]
         country = get_country_from_latlng(latlng)
         Earthquake.objects.create(
@@ -36,6 +40,9 @@ def get_earthquakes():
             magnitude=row[4],
             country=country,
         )
+        counter+=1
+
+    return counter
 
 def get_country_from_latlng(latlng):
     reverse_geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latlng}&key={google_api_key}&result_type=country"
