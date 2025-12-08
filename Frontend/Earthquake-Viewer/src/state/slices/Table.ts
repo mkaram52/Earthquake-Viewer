@@ -24,6 +24,7 @@ const tableSlice = createSlice({
     },
     closeList: (state) => {
       state.listOpen = false;
+      state.filterOpen = false;
     },
     openGraph: (state) => {
       state.filterOpen = false;
@@ -34,8 +35,6 @@ const tableSlice = createSlice({
       state.graphOpen = false;
     },
     openFilter: (state) => {
-      state.graphOpen = false;
-      state.listOpen = false;
       state.filterOpen = true;
     },
     closeFilter: (state) => {

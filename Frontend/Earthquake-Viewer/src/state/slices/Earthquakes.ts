@@ -170,8 +170,8 @@ const earthquakesSlice = createSlice({
     },
     sortByTime: (state) => {
       state.sort = "time";
-      const sortedEarthquakes = state.earthquakes.sort((a, b) => Number(new Date(a.time) > new Date(b.time)))
-      const sortedFilteredEarthquakes = state.filteredEarthquakes.sort((a, b) => Number(new Date(a.time) > new Date(b.time)));
+      const sortedEarthquakes = state.earthquakes.sort((a, b) => new Date(a.time) > new Date(b.time) ? -1 : 1);
+      const sortedFilteredEarthquakes = state.filteredEarthquakes.sort((a, b) => new Date(a.time) > new Date(b.time) ? -1 : 1);
 
       state.earthquakes = sortedEarthquakes;
       state.filteredEarthquakes = sortedFilteredEarthquakes;

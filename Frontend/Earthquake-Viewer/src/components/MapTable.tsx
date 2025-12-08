@@ -51,9 +51,37 @@ const MapTable = () => {
 
   const Section = () => {
     if (listOpen) {
-      return <EarthquakeList/>;
-    } else if (filterOpen) {
-      return <FilterList/>;
+      return (
+        <Box
+          display="flex"
+          flexDirection="column"
+          height="100%"
+          width="100%"
+        >
+          {filterOpen && (
+            <Box
+              position="sticky"
+              top={0}
+              zIndex={10}
+              width="100%"
+              flexShrink={0}
+              paddingBottom={2}
+              borderBottom="1px solid"
+              borderColor="gray.200"
+              boxShadow="sm"
+            >
+              <FilterList/>
+            </Box>
+          )}
+          <Box
+            flex="1"
+            overflowY="auto"
+            width="100%"
+          >
+            <EarthquakeList/>
+          </Box>
+        </Box>
+      )
     } else {
       return (
         <Center py={8}>
@@ -67,11 +95,11 @@ const MapTable = () => {
 
   return (
     <Box
-      overflowY="auto"
       width="100%"
       maxWidth="100%"
       height="100%"
       maxHeight="100%"
+      overflow="hidden"
     >
       {Section()}
     </Box>

@@ -3,13 +3,7 @@ import {
   Box,
   VStack,
   Text,
-  Center,
-  Spinner,
-  HStack,
-  Card,
-  CardBody,
 } from "@chakra-ui/react";
-import { Select } from "chakra-react-select";
 import StyledSelect from "./common/StyledSelect.tsx";
 import {
   selectInViewEarthquakes,
@@ -77,10 +71,10 @@ const FilterList = () => {
   const selectedSortOption = sortOptions.find((option) => option.value === selectedSort);
 
   return (
-    <VStack align="stretch" width="100%" spacing={2}>
-      <Box paddingBottom={10}>
+    <VStack align="stretch" width="100%" spacing={2} paddingBottom={4}>
+      <Box paddingBottom={4}>
         <VStack spacing={2}>
-          <Box width="100%" textAlign="left" paddingLeft={2}>
+          <Box>
             <Text fontSize="xl" fontWeight="bold" color="blue.400">
               Filter Options
             </Text>
@@ -110,7 +104,7 @@ const FilterList = () => {
       </Box>
       <Box>
         <VStack spacing={2}>
-          <Box width="100%" textAlign="left" paddingLeft={2}>
+          <Box>
             <Text fontSize="xl" fontWeight="bold" color="blue.400">
               Sort Options
             </Text>
