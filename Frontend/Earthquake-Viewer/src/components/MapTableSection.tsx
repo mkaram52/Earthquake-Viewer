@@ -47,7 +47,7 @@ const MapTableSection = React.memo<MapTableSectionProps>(
           flex="1"
           overflowY="auto"
           width="100%"
-          paddingTop={1}
+          paddingTop={listOpen ? 1 : 0}
           css={{
             "&::-webkit-scrollbar": {
               display: "none",

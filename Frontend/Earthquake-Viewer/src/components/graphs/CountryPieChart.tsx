@@ -6,25 +6,28 @@ import {
   Card,
 } from "@chakra-ui/react";
 import {
+  selectInViewEarthquakes,
   setMagnitudeHover,
   clearMagnitudeHover,
+  setCountryHover,
+  clearCountryHover,
 } from "../../state/slices/Earthquakes.ts";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import * as d3 from "d3";
 import { getMagnitudeColorHex } from "../../utils/magnitudeColors.ts";
 import { type Earthquake } from "../../api/earthquakes.ts";
 import type { AppDispatch } from "../../state/Store.ts";
 
-interface MagnitudePieChartProps {
+interface CountryPieChartProps {
   width: number;
   earthquakes: Earthquake[];
 }
 
-const MagnitudePieChart: React.FC<MagnitudePieChartProps> = ({ width, earthquakes }) => {
+const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes }) => {
   const dispatch = useDispatch<AppDispatch>();
   const chartRef = useRef<HTMLDivElement>(null);
 
-  const magnitudeData = useMemo(() => {
+  const countryData = useMemo(() => {
     if (!earthquakes || earthquakes.length === 0) {
       return [];
     }
@@ -32,22 +35,17 @@ const MagnitudePieChart: React.FC<MagnitudePieChartProps> = ({ width, earthquake
     const categories: { [key: string]: number } = {};
 
     earthquakes.forEach((eq: Earthquake) => {
-      const magFloor = Math.floor(eq.magnitude);
-      const category = magFloor >= 6 ? '6+' : `${magFloor}-${magFloor + 1}`;
+      const category = eq.country ? eq.country : "International";
       categories[category] = (categories[category] || 0) + 1;
-    });
+    })
 
     return Object.entries(categories)
       .map(([category, count]) => ({ category, count }))
-      .sort((a, b) => {
-        if (a.category === '9+') return 1;
-        if (b.category === '9+') return -1;
-        return parseFloat(a.category) - parseFloat(b.category);
-      });
+      .sort((a, b) => b.count - a.count);
   }, [earthquakes]);
 
   useEffect(() => {
-    if (!chartRef.current || magnitudeData.length === 0 || width === 0) {
+    if (!chartRef.current || countryData.length === 0 || width === 0) {
       return;
     }
 
@@ -73,32 +71,36 @@ const MagnitudePieChart: React.FC<MagnitudePieChartProps> = ({ width, earthquake
       .innerRadius(innerRadius)
       .outerRadius(radius)
       .padAngle(0.02)
-    const pieData = pie(magnitudeData);
+    const pieData = pie(countryData);
 
-    const getMagnitudeFromCategory = (category: string): number => {
-      if (category === '9+') return 9;
-      return parseFloat(category);
-    };
+    // Define your start and end colors for the gradient
+    const startColor = "#ADD8E6";
+    const endColor = "#00008B";
+
+    // Create a linear color scale
+    const colorScale = d3.scaleLinear()
+      .domain([d3.min(countryData, d => d.count), d3.max(countryData, d => d.count)]) // Map data values to the color range
+      .range([startColor, endColor]);
 
     svg
       .selectAll("path")
       .data(pieData)
       .join("path")
       .attr("d", arc)
-      .attr("fill", (d) => getMagnitudeColorHex(getMagnitudeFromCategory(d.data.category)))
+      .attr("fill", (d) => colorScale(d.data.count))
       .attr("stroke-width", 2)
       .style("cursor", "pointer")
       .on("mouseover", function(_event, d) {
-        dispatch(setMagnitudeHover({ magnitude: getMagnitudeFromCategory(d.data.category), count: d.data.count }));
+        dispatch(setCountryHover({ country: d.data.category, count: d.data.count }));
         d3.select(this).attr("opacity", 0.8);
       })
       .on("mouseout", function(_event, d) {
-        dispatch(clearMagnitudeHover());
+        dispatch(clearCountryHover());
         d3.select(this).attr("opacity", 1);
       });
-  }, [magnitudeData, width]);
+  }, [countryData, width])
 
-  if (magnitudeData.length === 0) {
+  if (countryData.length === 0) {
     return (
       <Box p={4}>
         <Text
@@ -122,7 +124,7 @@ const MagnitudePieChart: React.FC<MagnitudePieChartProps> = ({ width, earthquake
               color={"white"}
               textAlign="center"
             >
-              Magnitude
+              Country
             </Text>
           </Card.Body>
         </Card.Root>
@@ -138,4 +140,4 @@ const MagnitudePieChart: React.FC<MagnitudePieChartProps> = ({ width, earthquake
   );
 };
 
-export default MagnitudePieChart
+export default CountryPieChart;

@@ -38,16 +38,6 @@ const Home = () => {
       margin={0}
       padding={0}
     >
-      {/* Header section */}
-      <Box
-        bg="#f8f8fb"
-        width="100%"
-        flexShrink={0}
-      >
-        <Header />
-      </Box>
-
-      {/* Main content - Map takes remaining space */}
       <Box
         width="100%"
         flex="1"

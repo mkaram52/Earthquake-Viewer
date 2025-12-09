@@ -6,29 +6,37 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import {
-  selectInViewEarthquakes,
+  setDateHover,
+  clearDateHover,
 } from "../../state/slices/Earthquakes.ts";
-import { useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import * as d3 from "d3";
 import { getMagnitudeColorHex } from "../../utils/magnitudeColors.ts";
+import type { AppDispatch } from "../../state/Store.ts";
+import type { Earthquake } from "../../api/earthquakes.ts";
 
 interface DateBarChartProps {
   width: number;
   height: number;
+  earthquakes: Earthquake[];
 }
 
-const DateBarChart: React.FC<DateBarChartProps> = ({ width, height }) => {
+const DateBarChart: React.FC<DateBarChartProps> = ({
+  width,
+  height,
+  earthquakes,
+}) => {
+  const dispatch = useDispatch<AppDispatch>();
   const ref = useRef<HTMLDivElement>(null);
-  const filteredEarthquakes = useSelector(selectInViewEarthquakes);
 
   const magnitudeData = useMemo(() => {
-    if (!filteredEarthquakes || filteredEarthquakes.length === 0) {
+    if (!earthquakes || earthquakes.length === 0) {
       return [];
     }
 
     const categories: { [key: string]: { count: number, magCategories: { [key: string]: number }}} = {};
 
-    filteredEarthquakes.forEach((eq) => {
+    earthquakes.forEach((eq) => {
       const magFloor = Math.floor(eq.magnitude);
       const category = eq.time.split('T')[0];
       const subCategory = magFloor >= 9 ? '9+' : `${magFloor}-${magFloor + 1}`;
@@ -56,7 +64,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({ width, height }) => {
       .sort((a, b) => {
         return new Date(a.category) > new Date(b.category) ? 1 : -1;
       });
-  }, [filteredEarthquakes]);
+  }, [earthquakes]);
 
   useEffect(() => {
     if (!ref.current || magnitudeData.length === 0) {
@@ -174,15 +182,56 @@ const DateBarChart: React.FC<DateBarChartProps> = ({ width, height }) => {
           const datum = d as d3.SeriesPoint<StackedDataPoint>;
           return y(datum[0]) - y(datum[1]);
         })
-        .attr("fill", () => getMagnitudeColorHex(getMagnitudeFromCategory(series.key)))
-
+        .attr("fill", () => getMagnitudeColorHex(getMagnitudeFromCategory(series.key)));
     });
+
+    // Create invisible overlay rectangles for each column to handle hover events
+    svg
+      .selectAll("rect.column-overlay")
+      .data(stackedData)
+      .join("rect")
+      .attr("class", "column-overlay")
+      .attr("x", (d) => x(d.date) || 0)
+      .attr("y", 0)
+      .attr("width", x.bandwidth())
+      .attr("height", graphHeight)
+      .attr("fill", "transparent")
+      .style("cursor", "pointer")
+      .on("mouseover", function (_event, d) {
+        const total = Object.values(d).reduce((acc: number, rect) => {
+          if (typeof rect === "number") {
+            acc += rect;
+          }
+          return acc;
+        }, 0)
+        dispatch(setDateHover({ date: d.date, count: total }));
+        // Highlight all rectangles in this column (excluding overlay rectangles)
+        svg.selectAll("rect:not(.column-overlay)").filter(function() {
+          const rectX = d3.select(this).attr("x");
+          const overlayX = x(d.date) || 0;
+          return parseFloat(rectX) === overlayX;
+        }).attr("opacity", 0.8);
+      })
+      .on("mouseout", function (_event, d) {
+        dispatch(clearDateHover());
+        // Reset opacity for all rectangles in this column (excluding overlay rectangles)
+        svg.selectAll("rect:not(.column-overlay)").filter(function() {
+          const rectX = d3.select(this).attr("x");
+          const overlayX = x(d.date) || 0;
+          return parseFloat(rectX) === overlayX;
+        }).attr("opacity", 1);
+      });
   }, [magnitudeData, width, height]);
 
   if (magnitudeData.length === 0) {
     return (
       <Box p={4}>
-        <Text color="gray.600">No data to display</Text>
+        <Text
+          color="gray.600"
+          textAlign="center"
+        >
+          No data to display
+        </Text>
       </Box>
     );
   }

@@ -12,6 +12,8 @@ import {
   clearSelectedEarthquake,
   selectSelectedEarthquake,
   selectMagnitudeHover,
+  selectDateHover,
+  selectCountryHover,
 } from "../state/slices/Earthquakes.ts";
 import {
   openList
@@ -38,7 +40,10 @@ const Marker: React.FC<MarkerProps> = ({
   const contentRef = useRef(document.createElement("div"));
   const markerRef = useRef<mapboxgl.Marker | null>(null)
   const selectedEarthquake = useSelector(selectSelectedEarthquake);
-  const magnitudeHover = useSelector(selectMagnitudeHover);
+  const magnitude = useSelector(selectMagnitudeHover);
+  const date = useSelector(selectDateHover);
+  const country = useSelector(selectCountryHover);
+
   const isSelected = selectedEarthquake && earthquake.earthquake_id === selectedEarthquake.earthquake_id;
 
   const handleSelectEarthquake = (earthquake: Earthquake) => {
@@ -65,9 +70,26 @@ const Marker: React.FC<MarkerProps> = ({
   }, []);
 
   const display = () => {
-    if (!magnitudeHover) return 'flex';
-    if (Math.floor(earthquake.magnitude) === magnitudeHover) return 'flex';
-    return 'none';
+    if (!magnitude && !date && !country) return 'flex';
+    else if (magnitude) {
+      if (magnitude === 6) {
+        return earthquake.magnitude >= magnitude ? "flex" : "none";
+      } else {
+        return Math.floor(earthquake.magnitude) === magnitude ? 'flex' : 'none';
+      }
+    } else if (date) {
+      const eqDate = earthquake.time.split("T")[0];
+      if (eqDate === date) return 'flex';
+      else return 'none';
+    } else if (country) {
+      if (country === "International") {
+        return earthquake.country ? "none" : "flex";
+      } else {
+        return earthquake.country === country ? "flex" : "none";
+      }
+    } else {
+      return 'none';
+    }
   };
 
   return (

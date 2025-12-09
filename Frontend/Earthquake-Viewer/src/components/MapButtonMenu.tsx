@@ -60,14 +60,14 @@ const MapButtonMenu = () => {
     <Box
       position="absolute"
       left={0}
-      top="10%"
+      top="50%"
+      bg="transparent"
       transform="translateY(-50%)"
       zIndex={1000}
       ml={2}
     >
       <VStack
         spacing={2}
-        bg="white"
         p={2}
         borderRadius="md"
         boxShadow="lg"

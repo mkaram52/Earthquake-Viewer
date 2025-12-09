@@ -3,6 +3,7 @@ import {
   Box,
   VStack,
   Text,
+  Checkbox,
 } from "@chakra-ui/react";
 import StyledSelect from "./common/StyledSelect.tsx";
 import {
@@ -16,6 +17,7 @@ import {
   selectMagnitudeRangeFilter,
   selectHourFilter,
   selectSortOption,
+  selectGlobal,
   startFiltering,
   stopFiltering,
   sortByMagnitude,
@@ -24,6 +26,7 @@ import {
   setCountry,
   setMagnitudeRange,
   setHours,
+  toggleGlobal,
 } from "../state/slices/Earthquakes.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
@@ -56,6 +59,7 @@ const FilterList = () => {
   const selectedMagnitude = useSelector(selectMagnitudeRangeFilter);
   const selectedHour = useSelector(selectHourFilter);
   const selectedSort = useSelector(selectSortOption);
+  const global = useSelector(selectGlobal);
 
   const countryOptions = useMemo(() => {
     return countryList.map((country) => ({
@@ -108,6 +112,14 @@ const FilterList = () => {
             value={selectedHour ? selectedTimeOption : null}
             onChange={(value) => dispatch(setHours(value?.value))}
           />
+          <Checkbox.Root
+            checked={global}
+            onCheckedChange={(e) => dispatch(toggleGlobal())}
+          >
+            <Checkbox.HiddenInput />
+            <Checkbox.Control />
+            <Checkbox.Label>Expand graphs to include world-wide data</Checkbox.Label>
+          </Checkbox.Root>
         </VStack>
       </Box>
       <Box>

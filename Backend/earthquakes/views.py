@@ -7,7 +7,7 @@ from .serializers import EarthquakeSerializer
 
 
 class EarthquakeViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = Earthquake.objects.all().order_by("-time")
+    queryset = Earthquake.objects.all().order_by("-magnitude")
     permission_classes = [permissions.AllowAny]
     serializer_class = EarthquakeSerializer
 

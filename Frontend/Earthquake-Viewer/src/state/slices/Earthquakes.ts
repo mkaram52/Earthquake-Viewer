@@ -17,6 +17,7 @@ export interface EarthquakesState {
   country: string | null;
   magnitude: number | null;
   hours: number | null;
+  global: boolean;
 
   // Sort By
   sort: string | null;
@@ -28,6 +29,9 @@ export interface EarthquakesState {
 
   // Hover States
   magnitudeHover: number | null;
+  dateHover: string | null;
+  countryHover: string | null;
+  hoverCount: number;
 }
 
 const initialState: EarthquakesState = {
@@ -40,9 +44,10 @@ const initialState: EarthquakesState = {
   country: null,
   magnitude: null,
   hours: null,
+  global: false,
 
   // Sort By
-  sort: "time",
+  sort: "magnitude",
 
   // Data States
   isFiltering: false,
@@ -51,6 +56,9 @@ const initialState: EarthquakesState = {
 
   // Hover States
   magnitudeHover: null,
+  dateHover: null,
+  countryHover: null,
+  hoverCount: 0,
 }
 
 const earthquakesSlice = createSlice({
@@ -214,11 +222,32 @@ const earthquakesSlice = createSlice({
     stopFiltering: (state) => {
       state.isFiltering = false;
     },
-    setMagnitudeHover: (state, action: PayloadAction<number | null>) => {
-      state.magnitudeHover = action.payload;
+    setMagnitudeHover: (state, action: PayloadAction<{ magnitude: number, count: number }>) => {
+      state.magnitudeHover = action.payload.magnitude;
+      state.hoverCount = action.payload.count;
     },
     clearMagnitudeHover: (state) => {
       state.magnitudeHover = initialState.magnitudeHover;
+      state.hoverCount = initialState.hoverCount;
+    },
+    setDateHover: (state, action: PayloadAction<{ date: string, count: number }>) => {
+      state.dateHover = action.payload.date;
+      state.hoverCount = action.payload.count;
+    },
+    clearDateHover: (state) => {
+      state.dateHover = initialState.dateHover;
+      state.hoverCount = initialState.hoverCount;
+    },
+    setCountryHover: (state, action: PayloadAction<{ country: string, count: number }>) => {
+      state.countryHover = action.payload.country;
+      state.hoverCount = action.payload.count;
+    },
+    clearCountryHover: (state) => {
+      state.countryHover = initialState.countryHover;
+      state.hoverCount = initialState.hoverCount;
+    },
+    toggleGlobal: (state) => {
+      state.global = !state.global;
     },
   },
 });
@@ -234,6 +263,7 @@ export const {
   setCountry,
   setMagnitudeRange,
   setHours,
+  toggleGlobal,
 
   sortByMagnitude,
   sortByTime,
@@ -241,7 +271,11 @@ export const {
 
   // Hover State
   setMagnitudeHover,
-  clearMagnitudeHover
+  clearMagnitudeHover,
+  setDateHover,
+  clearDateHover,
+  setCountryHover,
+  clearCountryHover,
 } = earthquakesSlice.actions;
 
 export const selectInViewEarthquakes = (state: RootState) => state.earthquakes.inViewEarthquakes;
@@ -251,12 +285,17 @@ export const selectIsFiltering = (state: RootState) => state.earthquakes.isFilte
 export const selectCountryFilter = (state: RootState) => state.earthquakes.country;
 export const selectMagnitudeRangeFilter = (state: RootState) => state.earthquakes.magnitude;
 export const selectHourFilter = (state: RootState) => state.earthquakes.hours;
+export const selectGlobal = (state: RootState) => state.earthquakes.global;
 
 export const selectSortOption = (state: RootState) => state.earthquakes.sort;
 
 export const selectCountryOptions = (state: RootState) => [...new Set(state.earthquakes.earthquakes.map(earthquake => earthquake.country))].filter(Boolean);
 
 export const selectMagnitudeHover = (state: RootState) => state.earthquakes.magnitudeHover;
+export const selectDateHover = (state: RootState) => state.earthquakes.dateHover;
+export const selectCountryHover = (state: RootState) => state.earthquakes.countryHover;
+
+export const selectHoverCount = (state: RootState) => state.earthquakes.hoverCount;
 
 export const selectSelectedFirstEarthquakes = createSelector(
   [selectInViewEarthquakes, selectSelectedEarthquake],
