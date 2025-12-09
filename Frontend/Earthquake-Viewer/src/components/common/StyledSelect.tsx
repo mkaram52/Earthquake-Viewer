@@ -9,7 +9,7 @@ interface SelectProps {
   name: string;
   options: Option[];
   placeholder: string;
-  value: Option;
+  value: Option | null | undefined;
   onChange: (value: any) => void;
 }
 
@@ -26,7 +26,6 @@ const StyledSelect: React.FC<SelectProps> = ({
       options={options}
       placeholder={placeholder}
       isClearable={true}
-      useBasicStyles
       value={value}
       onChange={onChange}
       chakraStyles={{

@@ -1,14 +1,11 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import {
   Box,
   VStack,
   Text,
-  Center,
   Spinner,
-  HStack,
 } from "@chakra-ui/react";
 import {
-  selectInViewEarthquakes,
   selectIsFiltering,
 } from "../state/slices/Earthquakes.ts";
 import {
@@ -38,7 +35,7 @@ const MapTable = () => {
         alignItems="center"
         justifyContent="center"
       >
-        <VStack spacing={3}>
+        <VStack gap={3}>
           <Spinner size="lg" color="teal.500" />
           <Text color="gray.500">
             Loading Earthquakes...

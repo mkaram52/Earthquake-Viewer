@@ -67,7 +67,6 @@ const MapButtonMenu = () => {
       ml={2}
     >
       <VStack
-        spacing={2}
         p={2}
         borderRadius="md"
         boxShadow="lg"

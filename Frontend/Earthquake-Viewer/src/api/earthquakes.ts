@@ -19,7 +19,7 @@ interface EarthquakeResponse {
 
 export const fetchEarthquakes = async (): Promise<EarthquakeResponse> => {
   const client = axios.create({
-    baseURL: import.meta.env.VITE_BASE_URL,
+    baseURL: import.meta.env.VITE_BASE_URL || "http://localhost:8000/api/v1",
     timeout: 30000,
     withCredentials: true,
   });

@@ -43,7 +43,7 @@ const EarthquakeList = () => {
         alignItems="center"
         justifyContent="center"
       >
-        <VStack spacing={3}>
+        <VStack gap={3}>
           <Spinner size="lg" color="teal.500" />
           <Text color="gray.500">
             Loading Earthquakes...

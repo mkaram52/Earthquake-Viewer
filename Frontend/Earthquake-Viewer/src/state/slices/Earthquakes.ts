@@ -72,8 +72,8 @@ const earthquakesSlice = createSlice({
         filtered = filtered.filter(eq => eq.country === state.country);
       }
 
-      if (state.magnitude) {
-        filtered = filtered.filter(eq => eq.magnitude >= state.magnitude);
+      if (state.magnitude != null) {
+        filtered = filtered.filter(eq => eq.magnitude >= state.magnitude!);
       }
       state.filteredEarthquakes = filtered;
     },

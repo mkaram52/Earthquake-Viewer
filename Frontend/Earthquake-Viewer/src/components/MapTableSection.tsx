@@ -1,11 +1,8 @@
-import React, { useMemo } from 'react'
+import React from 'react'
 import {
   Box,
-  VStack,
   Text,
   Center,
-  Spinner,
-  HStack,
 } from "@chakra-ui/react";
 import EarthquakeList from "./EarthquakeList.tsx";
 import FilterList from "./FilterList.tsx";
