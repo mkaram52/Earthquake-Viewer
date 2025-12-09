@@ -22,7 +22,7 @@ def get_earthquakes():
     counter = 0
 
     for row in data[1:]:
-        if row[11] == last_earthquake.earthquake_id:
+        if last_earthquake and row[11] == last_earthquake.earthquake_id:
             return counter
         latlng = row[1] + "," + row[2]
         country = get_country_from_latlng(latlng)
