@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo, useCallback } from "react"
+import React, { useRef, useEffect, useMemo, useCallback, useState } from "react"
 import type { Earthquake } from "../api/earthquakes.ts";
 import { createPortal } from "react-dom";
 import arrowDown from "@iconify/icons-mdi/arrow-down";
@@ -20,7 +20,9 @@ import {
 } from "../state/slices/Table.ts";
 import { useDispatch, useSelector } from "react-redux";
 import type { AppDispatch } from "../state/Store.ts";
-import { getMagnitudeColorHex } from "../utils/magnitudeColors.ts";
+import {
+  getMagnitudeColorHex, getMagnitudeColorHoverHex
+} from "../utils/magnitudeColors.ts";
 
 addIcon("arrow-down", arrowDown);
 addIcon("star", star);
@@ -43,6 +45,7 @@ const Marker: React.FC<MarkerProps> = ({
   const magnitude = useSelector(selectMagnitudeHover);
   const date = useSelector(selectDateHover);
   const country = useSelector(selectCountryHover);
+  const [isHovered, setIsHovered] = useState(false);
 
   const isSelected = selectedEarthquake && earthquake.earthquake_id === selectedEarthquake.earthquake_id;
 
@@ -97,10 +100,11 @@ const Marker: React.FC<MarkerProps> = ({
       {createPortal(
         <div
           onClick={() => handleSelectEarthquake(earthquake)}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
           className="rounded-full flex items-center justify-center cursor-pointer w-10 h-10"
           style={{
-            // TO-DO : Add Hover Coloring
-            backgroundColor: markerColor,
+            backgroundColor: isHovered ? getMagnitudeColorHoverHex(earthquake.magnitude) : markerColor,
             borderRadius: '50%',
             width: '40px',
             height: '40px',
@@ -108,7 +112,9 @@ const Marker: React.FC<MarkerProps> = ({
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
-            border: '2px solid black'
+            border: '2px solid black',
+            transform: isHovered ? 'scale(1.2)' : 'scale(1)',
+            transition: 'transform 0.2s ease-in-out, background-color 0.2s ease-in-out'
           }}
         >
           {isSelected ? (

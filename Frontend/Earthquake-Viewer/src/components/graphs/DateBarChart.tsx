@@ -39,7 +39,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
     earthquakes.forEach((eq) => {
       const magFloor = Math.floor(eq.magnitude);
       const category = eq.time.split('T')[0];
-      const subCategory = magFloor >= 9 ? '9+' : `${magFloor}-${magFloor + 1}`;
+      const subCategory = magFloor >= 6 ? '6+' : `${magFloor}-${magFloor + 1}`;
 
       if (!categories[category]) {
         categories[category] = { count: 0, magCategories: {} };

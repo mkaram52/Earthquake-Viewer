@@ -73,21 +73,32 @@ const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes })
       .padAngle(0.02)
     const pieData = pie(countryData);
 
-    // Define your start and end colors for the gradient
     const startColor = "#ADD8E6";
     const endColor = "#00008B";
 
-    // Create a linear color scale
-    const colorScale = d3.scaleLinear()
-      .domain([d3.min(countryData, d => d.count), d3.max(countryData, d => d.count)]) // Map data values to the color range
-      .range([startColor, endColor]);
+    // Create a map from category to index for efficient lookup
+    const categoryToIndex = new Map<string, number>();
+    countryData.forEach((item, index) => {
+      if (index >= 5) categoryToIndex.set(item.category, 5);
+      else categoryToIndex.set(item.category, index);
+    });
+
+    // Create a linear color scale based on index (even distribution)
+    // Domain is [0, countryData.length - 1] to evenly distribute colors
+    // Maxing out at 5 to account for many smaller countries
+    const colorScale = d3.scaleLinear<string>()
+      .domain([0, Math.min(countryData.length - 1, 5)])
+      .range([endColor, startColor]);
 
     svg
       .selectAll("path")
       .data(pieData)
       .join("path")
       .attr("d", arc)
-      .attr("fill", (d) => colorScale(d.data.count))
+      .attr("fill", (d) => {
+        const index = categoryToIndex.get(d.data.category) ?? 0;
+        return colorScale(index);
+      })
       .attr("stroke-width", 2)
       .style("cursor", "pointer")
       .on("mouseover", function(_event, d) {

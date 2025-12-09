@@ -13,6 +13,7 @@ import {
   setInViewEarthquakes,
   selectSelectedEarthquake,
   selectFilteredEarthquakes,
+  selectInViewEarthquakes,
   startFiltering,
   stopFiltering,
   selectCountryFilter,
@@ -30,6 +31,7 @@ const Map = () => {
   const [mapLoaded, setMapLoaded] = useState(false)
   const selectedEarthquake = useSelector(selectSelectedEarthquake);
   const filteredEarthquakes = useSelector(selectFilteredEarthquakes);
+  const inViewEarthquakes = useSelector(selectInViewEarthquakes);
   const isTableOpen = useSelector(selectIsOpen);
   const selectedCountry = useSelector(selectCountryFilter);
 
@@ -122,6 +124,7 @@ const Map = () => {
     if (!mapRef.current || !mapLoaded || !filteredEarthquakes) return;
 
     const handleMoveEnd = () => {
+      dispatch(startFiltering());
       checkVisibleMarkers();
     };
 
@@ -205,7 +208,7 @@ const Map = () => {
       >
         <div style={{ width: '100%', height: '100%' }} ref={mapContainerRef} />
         <MapButtonMenu />
-        {mapLoaded && mapRef.current && [...filteredEarthquakes].reverse().map((eq) => (
+        {mapLoaded && mapRef.current && [...inViewEarthquakes].reverse().map((eq) => (
           <Marker
             key={eq.earthquake_id}
             earthquake={eq}
