@@ -5,7 +5,7 @@ import {
   VStack,
   StackSeparator,
 } from "@chakra-ui/react";
-import MagnitudeBarChart from "./graphs/MagnitudeBarChart.tsx";
+import DateBarChart from "./graphs/DateBarChart.tsx";
 import MagnitudePieChart from "./graphs/MagnitudePieChart.tsx";
 
 const GraphList = () => {
@@ -47,9 +47,9 @@ const GraphList = () => {
           w="100%"
         >
           <Card.Body p={0}>
-            <MagnitudeBarChart
+            <DateBarChart
               width={width}
-              height={400}
+              height={width}
             />
           </Card.Body>
         </Card.Root>

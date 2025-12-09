@@ -104,10 +104,6 @@ const earthquakesSlice = createSlice({
 
       state.filteredEarthquakes = filteredEq;
     },
-    clearCountry: (state) => {
-      state.filteredEarthquakes = state.earthquakes;
-      state.country = null;
-    },
     setMagnitudeRange: (state, action: PayloadAction<number | null>) => {
       if (action.payload) {
         state.magnitude = action.payload;
@@ -230,13 +226,12 @@ const earthquakesSlice = createSlice({
 export const {
   setEarthquakes,
   setInViewEarthquakes,
-  clearInViewEarthquakes,
   selectEarthquake,
   clearSelectedEarthquake,
   startFiltering,
   stopFiltering,
+
   setCountry,
-  clearCountry,
   setMagnitudeRange,
   setHours,
 
