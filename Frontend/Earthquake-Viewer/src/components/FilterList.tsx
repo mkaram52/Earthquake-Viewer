@@ -109,7 +109,7 @@ const FilterList = () => {
           />
           <Checkbox.Root
             checked={global}
-            onCheckedChange={(e) => dispatch(toggleGlobal())}
+            onCheckedChange={() => dispatch(toggleGlobal())}
           >
             <Checkbox.HiddenInput />
             <Checkbox.Control />

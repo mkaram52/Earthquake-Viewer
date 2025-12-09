@@ -6,15 +6,11 @@ import {
   Card,
 } from "@chakra-ui/react";
 import {
-  selectInViewEarthquakes,
-  setMagnitudeHover,
-  clearMagnitudeHover,
   setCountryHover,
   clearCountryHover,
 } from "../../state/slices/Earthquakes.ts";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import * as d3 from "d3";
-import { getMagnitudeColorHex } from "../../utils/magnitudeColors.ts";
 import { type Earthquake } from "../../api/earthquakes.ts";
 import type { AppDispatch } from "../../state/Store.ts";
 
@@ -105,7 +101,7 @@ const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes })
         dispatch(setCountryHover({ country: d.data.category, count: d.data.count }));
         d3.select(this).attr("opacity", 0.8);
       })
-      .on("mouseout", function(_event, d) {
+      .on("mouseout", function(_event) {
         dispatch(clearCountryHover());
         d3.select(this).attr("opacity", 1);
       });

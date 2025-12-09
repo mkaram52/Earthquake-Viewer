@@ -92,7 +92,7 @@ const MagnitudePieChart: React.FC<MagnitudePieChartProps> = ({ width, earthquake
         dispatch(setMagnitudeHover({ magnitude: getMagnitudeFromCategory(d.data.category), count: d.data.count }));
         d3.select(this).attr("opacity", 0.8);
       })
-      .on("mouseout", function(_event, d) {
+      .on("mouseout", function(_event) {
         dispatch(clearMagnitudeHover());
         d3.select(this).attr("opacity", 1);
       });
