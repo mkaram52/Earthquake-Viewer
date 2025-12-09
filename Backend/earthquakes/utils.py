@@ -1,15 +1,11 @@
 import requests
 import csv
 import io
+from django.conf import settings
 
 from .models import (
     Earthquake
 )
-from .serializers import (
-    EarthquakeSerializer
-)
-
-google_api_key="AIzaSyA11gialtmUtD5XoYmhU-X775B3CU-LVvM"
 
 def get_earthquakes():
     url = "https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/2.5_week.csv"
@@ -45,7 +41,7 @@ def get_earthquakes():
     return counter
 
 def get_country_from_latlng(latlng):
-    reverse_geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latlng}&key={google_api_key}&result_type=country"
+    reverse_geocode_url = f"https://maps.googleapis.com/maps/api/geocode/json?latlng={latlng}&key={settings.GOOGLE_API_KEY}&result_type=country"
     response = requests.get(reverse_geocode_url).json()
     results = response.get('results', {})
 
