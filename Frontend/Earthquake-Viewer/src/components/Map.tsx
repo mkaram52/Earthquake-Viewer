@@ -12,12 +12,10 @@ import { boundingBorders } from "../utils/countries.ts";
 import {
   setInViewEarthquakes,
   selectSelectedEarthquake,
-  selectIsFiltering,
-  selectEarthquakes,
+  selectFilteredEarthquakes,
   startFiltering,
   stopFiltering,
   selectCountryFilter,
-  selectMagnitudeHover,
 } from "../state/slices/Earthquakes.ts";
 import {
   selectIsOpen,
@@ -31,7 +29,7 @@ const Map = () => {
   const mapContainerRef = useRef<HTMLDivElement>(null)
   const [mapLoaded, setMapLoaded] = useState(false)
   const selectedEarthquake = useSelector(selectSelectedEarthquake);
-  const earthquakes = useSelector(selectEarthquakes);
+  const filteredEarthquakes = useSelector(selectFilteredEarthquakes);
   const isTableOpen = useSelector(selectIsOpen);
   const selectedCountry = useSelector(selectCountryFilter);
 
@@ -62,7 +60,7 @@ const Map = () => {
   const checkVisibleMarkers = useCallback(() => {
     dispatch(startFiltering());
     if (!mapRef.current) return;
-    if (!earthquakes || earthquakes.length === 0) {
+    if (!filteredEarthquakes || filteredEarthquakes.length === 0) {
       dispatch(setInViewEarthquakes([]));
       dispatch(stopFiltering());
       return;
@@ -71,17 +69,57 @@ const Map = () => {
     const bounds = mapRef.current.getBounds();
     if (!bounds) return;
 
-    const visibleEarthquakes = earthquakes.filter((eq) => {
-      const eqLngLat: [number, number] = [eq.longitude, eq.latitude];
-      if (bounds.contains(eqLngLat)) return true;
+    const sw = bounds.getSouthWest();
+    const ne = bounds.getNorthEast();
+    
+    // Normalize longitudes to -180 to 180 range
+    const normalizeLng = (lng: number): number => {
+      while (lng < -180) lng += 360;
+      while (lng > 180) lng -= 360;
+      return lng;
+    };
+
+    const swLngRaw = sw.lng;
+    const swLat = sw.lat;
+    const neLngRaw = ne.lng;
+    const neLat = ne.lat;
+
+    // If the map is expanded so far that the longitude range is over 360,
+    // then everything is in view
+    if (swLngRaw <= -360 || neLngRaw >= 360 || neLngRaw - swLngRaw > 360) {
+      dispatch(setInViewEarthquakes(filteredEarthquakes));
+      dispatch(stopFiltering());
+      return;
+    }
+
+    const swLng = normalizeLng(swLngRaw);
+    const neLng = normalizeLng(neLngRaw);
+
+    // Ran into an issue where mapbox inaccurately defines its bounds when zoomed out
+    const isPointInBounds = (lng: number, lat: number): boolean => {
+      const normalizedLng = normalizeLng(lng);
+
+      if (lat < swLat || lat > neLat) {
+        return false;
+      }
+
+      if (swLng <= neLng) {
+        return normalizedLng >= swLng && normalizedLng <= neLng;
+      } else {
+        return normalizedLng >= swLng || normalizedLng <= neLng;
+      }
+    };
+
+    const visibleEarthquakes = filteredEarthquakes.filter((eq) => {
+      return isPointInBounds(eq.longitude, eq.latitude);
     })
+    
     dispatch(setInViewEarthquakes(visibleEarthquakes || []));
     dispatch(stopFiltering());
-  }, [earthquakes, dispatch]);
+  }, [filteredEarthquakes, dispatch]);
 
-  // Set up event listener for map movement when map is loaded and data is available
   useEffect(() => {
-    if (!mapRef.current || !mapLoaded || !earthquakes) return;
+    if (!mapRef.current || !mapLoaded || !filteredEarthquakes) return;
 
     const handleMoveEnd = () => {
       checkVisibleMarkers();
@@ -89,13 +127,12 @@ const Map = () => {
 
     mapRef.current.on('moveend', handleMoveEnd);
     
-    // Initial check when data is loaded
     checkVisibleMarkers();
 
     return () => {
       mapRef.current?.off('moveend', handleMoveEnd);
     }
-  }, [mapLoaded, earthquakes, checkVisibleMarkers])
+  }, [mapLoaded, filteredEarthquakes, checkVisibleMarkers])
 
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
@@ -110,11 +147,9 @@ const Map = () => {
     }
   },[selectedEarthquake])
 
-  // Resize map when table opens/closes - wait for animation to complete
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
     
-    // Wait for animation to complete (300ms) plus a small buffer
     const timeoutId = setTimeout(() => {
       mapRef.current?.resize();
     }, 350);
@@ -161,7 +196,6 @@ const Map = () => {
         </Box>
       </Box>
       
-      {/* Map container */}
       <Box
         flex="1"
         h="100%"
@@ -171,7 +205,7 @@ const Map = () => {
       >
         <div style={{ width: '100%', height: '100%' }} ref={mapContainerRef} />
         <MapButtonMenu />
-        {mapLoaded && mapRef.current && [...earthquakes].reverse().map((eq) => (
+        {mapLoaded && mapRef.current && [...filteredEarthquakes].reverse().map((eq) => (
           <Marker
             key={eq.earthquake_id}
             earthquake={eq}

@@ -172,23 +172,23 @@ const earthquakesSlice = createSlice({
     },
     sortByMagnitude: (state) => {
       state.sort = "magnitude";
-      const sortedEarthquakes = state.earthquakes.sort((a, b) => b.magnitude - a.magnitude);
-      const sortedFilteredEarthquakes = state.filteredEarthquakes.sort((a, b) => b.magnitude - a.magnitude);
+      const sortedEarthquakes = [...state.earthquakes].sort((a, b) => b.magnitude - a.magnitude);
+      const sortedFilteredEarthquakes = [...state.filteredEarthquakes].sort((a, b) => b.magnitude - a.magnitude);
 
       state.earthquakes = sortedEarthquakes;
       state.filteredEarthquakes = sortedFilteredEarthquakes;
     },
     sortByTime: (state) => {
       state.sort = "time";
-      const sortedEarthquakes = state.earthquakes.sort((a, b) => new Date(a.time) > new Date(b.time) ? -1 : 1);
-      const sortedFilteredEarthquakes = state.filteredEarthquakes.sort((a, b) => new Date(a.time) > new Date(b.time) ? -1 : 1);
+      const sortedEarthquakes = [...state.earthquakes].sort((a, b) => new Date(a.time) > new Date(b.time) ? -1 : 1);
+      const sortedFilteredEarthquakes = [...state.filteredEarthquakes].sort((a, b) => new Date(a.time) > new Date(b.time) ? -1 : 1);
 
       state.earthquakes = sortedEarthquakes;
       state.filteredEarthquakes = sortedFilteredEarthquakes;
     },
     sortByCountry: (state) => {
       state.sort = "country";
-      const sortedEarthquakes = state.earthquakes.sort(
+      const sortedEarthquakes = [...state.earthquakes].sort(
         (a, b) => {
           if (!a.country) return 1;
           else if (!b.country) return -1;
@@ -197,7 +197,7 @@ const earthquakesSlice = createSlice({
           }
         }
       );
-      const sortedFilteredEarthquakes = state.filteredEarthquakes.sort(
+      const sortedFilteredEarthquakes = [...state.filteredEarthquakes].sort(
         (a, b) => {
           if (!a.country) return 1;
           else if (!b.country) return -1;
@@ -280,7 +280,9 @@ export const {
 
 export const selectInViewEarthquakes = (state: RootState) => state.earthquakes.inViewEarthquakes;
 export const selectSelectedEarthquake = (state: RootState) => state.earthquakes.selectedEarthquake;
-export const selectEarthquakes = (state: RootState) => state.earthquakes.filteredEarthquakes;
+export const selectFilteredEarthquakes = (state: RootState) => state.earthquakes.filteredEarthquakes;
+export const selectEarthquakes = (state: RootState) => state.earthquakes.earthquakes;
+
 export const selectIsFiltering = (state: RootState) => state.earthquakes.isFiltering;
 export const selectCountryFilter = (state: RootState) => state.earthquakes.country;
 export const selectMagnitudeRangeFilter = (state: RootState) => state.earthquakes.magnitude;
@@ -289,13 +291,22 @@ export const selectGlobal = (state: RootState) => state.earthquakes.global;
 
 export const selectSortOption = (state: RootState) => state.earthquakes.sort;
 
-export const selectCountryOptions = (state: RootState) => [...new Set(state.earthquakes.earthquakes.map(earthquake => earthquake.country))].filter(Boolean);
-
 export const selectMagnitudeHover = (state: RootState) => state.earthquakes.magnitudeHover;
+
 export const selectDateHover = (state: RootState) => state.earthquakes.dateHover;
 export const selectCountryHover = (state: RootState) => state.earthquakes.countryHover;
-
 export const selectHoverCount = (state: RootState) => state.earthquakes.hoverCount;
+
+export const selectCountryOptions = createSelector(
+  [selectEarthquakes],
+  (earthquakes) => {
+    return (
+      [...new Set(
+        earthquakes.map(earthquake => earthquake.country))
+      ].filter(Boolean)
+    );
+  }
+)
 
 export const selectSelectedFirstEarthquakes = createSelector(
   [selectInViewEarthquakes, selectSelectedEarthquake],

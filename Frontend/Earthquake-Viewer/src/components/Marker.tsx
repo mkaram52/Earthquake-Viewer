@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useMemo } from "react"
+import React, { useRef, useEffect, useMemo, useCallback } from "react"
 import type { Earthquake } from "../api/earthquakes.ts";
 import { createPortal } from "react-dom";
 import arrowDown from "@iconify/icons-mdi/arrow-down";
@@ -46,14 +46,14 @@ const Marker: React.FC<MarkerProps> = ({
 
   const isSelected = selectedEarthquake && earthquake.earthquake_id === selectedEarthquake.earthquake_id;
 
-  const handleSelectEarthquake = (earthquake: Earthquake) => {
+  const handleSelectEarthquake = useCallback((earthquake: Earthquake) => {
     if (earthquake.earthquake_id === selectedEarthquake?.earthquake_id) {
       dispatch(clearSelectedEarthquake());
     } else {
       dispatch(selectEarthquake(earthquake));
       dispatch(openList());
     }
-  }
+  }, [selectedEarthquake, dispatch]);
 
   const markerColor = useMemo(() => {
     return getMagnitudeColorHex(earthquake.magnitude);
@@ -67,9 +67,9 @@ const Marker: React.FC<MarkerProps> = ({
     return () => {
       markerRef.current?.remove()
     }
-  }, []);
+  }, [earthquake.longitude, earthquake.latitude, map]);
 
-  const display = () => {
+  const display = useMemo(() => {
     if (!magnitude && !date && !country) return 'flex';
     else if (magnitude) {
       if (magnitude === 6) {
@@ -90,7 +90,7 @@ const Marker: React.FC<MarkerProps> = ({
     } else {
       return 'none';
     }
-  };
+  }, [magnitude, date, country, earthquake.magnitude, earthquake.time, earthquake.country]);
 
   return (
     <>
@@ -104,7 +104,7 @@ const Marker: React.FC<MarkerProps> = ({
             borderRadius: '50%',
             width: '40px',
             height: '40px',
-            display: display(),
+            display: display,
             alignItems: 'center',
             justifyContent: 'center',
             cursor: 'pointer',
@@ -123,4 +123,14 @@ const Marker: React.FC<MarkerProps> = ({
   )
 }
 
-export default Marker;
+export default React.memo(Marker, (prevProps, nextProps) => {
+  return (
+    prevProps.earthquake.earthquake_id === nextProps.earthquake.earthquake_id &&
+    prevProps.earthquake.longitude === nextProps.earthquake.longitude &&
+    prevProps.earthquake.latitude === nextProps.earthquake.latitude &&
+    prevProps.earthquake.magnitude === nextProps.earthquake.magnitude &&
+    prevProps.earthquake.time === nextProps.earthquake.time &&
+    prevProps.earthquake.country === nextProps.earthquake.country &&
+    prevProps.map === nextProps.map
+  );
+});

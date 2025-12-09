@@ -68,7 +68,7 @@ const FilterList = () => {
     }));
   }, [countryList]);
 
-  const handleSort = (type: string) => {
+  const handleSort = useCallback((type: string) => {
     if (type === "magnitude") {
       dispatch(sortByMagnitude());
     } else if (type === "time") {
@@ -76,7 +76,7 @@ const FilterList = () => {
     } else if (type === "country") {
       dispatch(sortByCountry());
     }
-  }
+  }, [dispatch]);
 
   const selectedMagOption = magnitudeOptions.find((option) => option.value === selectedMagnitude);
   const selectedTimeOption = timeOptions.find((option) => option.value === selectedHour);

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useCallback } from 'react'
 import {
   VStack,
   IconButton,
@@ -32,29 +32,29 @@ const MapButtonMenu = () => {
   const filterOpen = useSelector(selectFilterOpen);
   const graphOpen = useSelector(selectGraphOpen);
 
-  const handleSelectList = () => {
+  const handleSelectList = useCallback(() => {
     if (listOpen) {
       dispatch(closeList());
     } else {
       dispatch(openList());
     }
-  }
+  }, [ dispatch, listOpen ]);
 
-  const handleSelectFilter = () => {
+  const handleSelectFilter = useCallback(() => {
     if (filterOpen) {
       dispatch(closeFilter());
     } else {
       dispatch(openFilter());
     }
-  }
+  }, [ dispatch, filterOpen ]);
 
-  const handleSelectGraph = () => {
+  const handleSelectGraph = useCallback(() => {
     if (graphOpen) {
       dispatch(closeGraph());
     } else {
       dispatch(openGraph());
     }
-  }
+  }, [ dispatch, graphOpen ]);
 
   return (
     <Box

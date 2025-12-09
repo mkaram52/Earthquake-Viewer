@@ -11,7 +11,7 @@ import CountryPieChart from "./graphs/CountryPieChart.tsx";
 import { useSelector } from "react-redux";
 import {
   selectMagnitudeHover,
-  selectEarthquakes,
+  selectFilteredEarthquakes,
   selectDateHover,
   selectCountryHover,
   selectHoverCount,
@@ -23,7 +23,7 @@ import { getMagnitudeColorHex } from "../utils/magnitudeColors.ts";
 const GraphList = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const inViewEarthquakes = useSelector(selectInViewEarthquakes);
-  const filteredEarthquakes = useSelector(selectEarthquakes);
+  const filteredEarthquakes = useSelector(selectFilteredEarthquakes);
   const [width, setWidth] = useState(0);
   const magnitude = useSelector(selectMagnitudeHover);
   const date = useSelector(selectDateHover);

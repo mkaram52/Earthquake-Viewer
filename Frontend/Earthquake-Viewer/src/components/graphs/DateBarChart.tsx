@@ -100,14 +100,17 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
 
     interface StackedDataPoint {
       date: string;
+      total: number;
       [key: string]: string | number;
     }
     
     const stackedData: StackedDataPoint[] = magnitudeData.map((d) => {
-      const dateData: StackedDataPoint = { date: d.category };
+      const dateData: StackedDataPoint = { date: d.category, total: 0 };
       sortedMagCategories.forEach((magCat) => {
         const subCat = d.subCategories.find((sc) => sc.category === magCat);
-        dateData[magCat] = subCat ? subCat.count : 0;
+        const count = subCat ? subCat.count : 0;
+        dateData[magCat] = count;
+        dateData.total += count;
       });
       return dateData;
     });
@@ -124,7 +127,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       .scaleBand()
       .range([0, graphWidth])
       .domain(magnitudeData.map((d) => d.category))
-      .padding(0.2);
+      .paddingInner(0.1);
 
     const dateFormatter = d3.timeFormat("%b %-d");
     
@@ -175,12 +178,12 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
         })
         .attr("y", (d) => {
           const datum = d as d3.SeriesPoint<StackedDataPoint>;
-          return y(datum[1]);
+          return Math.min(y(datum[0]), y(datum[1]));
         })
         .attr("width", x.bandwidth())
         .attr("height", (d) => {
           const datum = d as d3.SeriesPoint<StackedDataPoint>;
-          return y(datum[0]) - y(datum[1]);
+          return Math.abs(y(datum[0]) - y(datum[1]));
         })
         .attr("fill", () => getMagnitudeColorHex(getMagnitudeFromCategory(series.key)));
     });
@@ -192,19 +195,19 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       .join("rect")
       .attr("class", "column-overlay")
       .attr("x", (d) => x(d.date) || 0)
-      .attr("y", 0)
+      .attr("y", (d) => {
+        // y position is at the top of the stack (y(total))
+        return y(d.total);
+      })
       .attr("width", x.bandwidth())
-      .attr("height", graphHeight)
+      .attr("height", (d) => {
+        // Height is from top of stack (y(total)) to bottom (y(0) = graphHeight)
+        return graphHeight - y(d.total);
+      })
       .attr("fill", "transparent")
       .style("cursor", "pointer")
       .on("mouseover", function (_event, d) {
-        const total = Object.values(d).reduce((acc: number, rect) => {
-          if (typeof rect === "number") {
-            acc += rect;
-          }
-          return acc;
-        }, 0)
-        dispatch(setDateHover({ date: d.date, count: total }));
+        dispatch(setDateHover({ date: d.date, count: d.total }));
         // Highlight all rectangles in this column (excluding overlay rectangles)
         svg.selectAll("rect:not(.column-overlay)").filter(function() {
           const rectX = d3.select(this).attr("x");

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { ChakraProvider, defaultSystem } from "@chakra-ui/react";
 import {
   QueryClient,
@@ -8,8 +9,7 @@ import { Provider } from 'react-redux';
 import store from './state/Store.ts'
 
 function App() {
-
-  const queryClient = new QueryClient()
+  const [queryClient] = useState(() => new QueryClient());
 
   return (
     <Provider store={store}>
