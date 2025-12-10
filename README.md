@@ -3,7 +3,7 @@
 <H4>Probably more than you think!</H4>
 
 <p>Earthquake Viewer is an educational tool to help users visualize and understand the frequency and strength of earthquakes around the world.</p>
-<a href="https://earthquake-viewer-app.onrender.com/" target="_blank">Check out Earthquake Viewer</a>
+<a href="https://earthquake-viewer-app.onrender.com/" target="_blank">Check out Earthquake Viewer!</a>
 <br>
 <br>
 <p>This project was an educational endeavor for me as well!</p>
@@ -13,7 +13,6 @@
     <ul>
       <li>React</li>
       <li>TypeScript</li>
-      <li>Redux</li>
       <li>Mapbox GL</li>
       <li>D3</li>
     </ul>
