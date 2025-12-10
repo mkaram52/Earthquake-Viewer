@@ -23,6 +23,7 @@ const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes })
   const dispatch = useDispatch<AppDispatch>();
   const chartRef = useRef<HTMLDivElement>(null);
 
+  // Categorize earthquakes by country in to category object: Ex. { category: "United States", count: 5 }
   const countryData = useMemo(() => {
     if (!earthquakes || earthquakes.length === 0) {
       return [];
@@ -45,22 +46,25 @@ const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes })
       return;
     }
 
+    // Clear previous chart for reloading
     d3.select(chartRef.current).selectAll("*").remove();
 
+    // Set inner donut hole at 1/3 of radius
     const radius = width / 2 - 40;
     const innerRadius = radius / 3;
+
     const svg = d3
       .select(chartRef.current)
       .append("svg")
       .attr("width", width)
       .attr("height", width)
-      .append("g")
+      .append("g") // Creates a group to translate the whole graph
       .attr("transform", `translate(${width / 2},${width / 2})`);
 
     const pie = d3
       .pie<{ category: string; count: number }>()
-      .value((d) => d.count)
-      .sort(null);
+      .value((d) => d.count) // Sets count as the property that determines slice size
+      .sort(null); // Sorting is done in object creation
 
     const arc = d3
       .arc<d3.PieArcDatum<{ category: string; count: number }>>()
@@ -79,8 +83,8 @@ const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes })
       else categoryToIndex.set(item.category, index);
     });
 
-    // Create a linear color scale based on index (even distribution)
-    // Domain is [0, countryData.length - 1] to evenly distribute colors
+    // Create a linear color scale based on index
+    // Divide the color range into (countryData.length - 1 || 5) evenly distribute colors
     // Maxing out at 5 to account for many smaller countries
     const colorScale = d3.scaleLinear<string>()
       .domain([0, Math.min(countryData.length - 1, 5)])
@@ -88,14 +92,13 @@ const CountryPieChart: React.FC<CountryPieChartProps> = ({ width, earthquakes })
 
     svg
       .selectAll("path")
-      .data(pieData)
+      .data(pieData) // Binds the pie data
       .join("path")
-      .attr("d", arc)
+      .attr("d", arc) // Draws the arcs using the arc generator
       .attr("fill", (d) => {
         const index = categoryToIndex.get(d.data.category) ?? 0;
         return colorScale(index);
       })
-      .attr("stroke-width", 2)
       .style("cursor", "pointer")
       .on("mouseover", function(_event, d) {
         dispatch(setCountryHover({ country: d.data.category, count: d.data.count }));

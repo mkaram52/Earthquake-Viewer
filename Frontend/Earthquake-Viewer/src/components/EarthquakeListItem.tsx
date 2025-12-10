@@ -70,8 +70,9 @@ const EarthquakeListItem = React.memo<EarthquakeListItemProps>(
                 textAlign="left"
                 lineHeight="1.2"
               >
-                {formattedDate} • {time}
+                {formattedDate} • {time} {eq.country && `• ${eq.country}`}
               </Text>
+
             </VStack>
             {selected && (
               <VStack align="flex-start">
@@ -95,39 +96,15 @@ const EarthquakeListItem = React.memo<EarthquakeListItemProps>(
                     Depth: {eq.depth.toFixed(2)} km
                   </Text>
                 </HStack>
-                <HStack>
-                  <Text
-                    fontSize="13px"
-                    textAlign="left"
-                    lineHeight="1.2"
-                    mb={1}
-                    color="white"
-                  >
-                    {eq.latitude.toFixed(2)}°, {eq.longitude.toFixed(2)}°
-                  </Text>
-                  {eq.country && (
-                    <HStack>
-                      <Text
-                        fontSize="13px"
-                        textAlign="left"
-                        lineHeight="1.2"
-                        mb={1}
-                        color="white"
-                      >
-                        •
-                      </Text>
-                      <Text
-                        fontSize="13px"
-                        textAlign="left"
-                        lineHeight="1.2"
-                        mb={1}
-                        color="white"
-                      >
-                        {eq.country}
-                      </Text>
-                    </HStack>
-                  )}
-                </HStack>
+                <Text
+                  fontSize="13px"
+                  textAlign="left"
+                  lineHeight="1.2"
+                  mb={1}
+                  color="white"
+                >
+                  {eq.latitude.toFixed(2)}°, {eq.longitude.toFixed(2)}°
+                </Text>
                 <Text fontSize="11px" color="blue.500">
                   <a
                     href={`https://earthquake.usgs.gov/earthquakes/eventpage/${eq.earthquake_id}/executive`}

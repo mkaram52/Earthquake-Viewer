@@ -29,6 +29,8 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
   const dispatch = useDispatch<AppDispatch>();
   const ref = useRef<HTMLDivElement>(null);
 
+  // Categorize earthquakes by date, then create magnitude categories within each date category
+  // Ex: { category: "2025-12-09", count: 50, subCategories: [{ category: "2-3", count: 17 }] }
   const magnitudeData = useMemo(() => {
     if (!earthquakes || earthquakes.length === 0) {
       return [];
@@ -54,9 +56,9 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
         const subCategories = Object.entries(value.magCategories)
           .map(([category, count]) => ({ category, count }))
           .sort((a, b) => {
-            // Sort by magnitude value (handle 9+ specially)
-            if (a.category === '9+') return 1;
-            if (b.category === '9+') return -1;
+            // Sort by magnitude value (handle 6+ specially)
+            if (a.category === '6+') return 1;
+            if (b.category === '6+') return -1;
             return parseFloat(a.category) - parseFloat(b.category);
           });
         return ({ category, count: value.count, subCategories });
@@ -71,8 +73,10 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       return;
     }
 
+    // Clear previous chart for reloading
     d3.select(ref.current).selectAll("*").remove();
 
+    // Set margins for axis info
     const margin = { top: 30, right: 30, bottom: 70, left: 30 };
     const graphWidth = width - margin.left - margin.right;
     const graphHeight = height - margin.top - margin.bottom;
@@ -85,6 +89,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       .append("g")
       .attr("transform", `translate(${margin.left},${margin.top})`);
 
+    // Get a set of all magnitude categories represented
     const allMagCategories = new Set<string>();
     magnitudeData.forEach((d) => {
       d.subCategories.forEach((sub) => {
@@ -93,8 +98,8 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
     });
 
     const sortedMagCategories = Array.from(allMagCategories).sort((a, b) => {
-      if (a === '9+') return 1;
-      if (b === '9+') return -1;
+      if (a === '6+') return 1;
+      if (b === '6+') return -1;
       return parseFloat(a) - parseFloat(b);
     });
 
@@ -115,7 +120,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       return dateData;
     });
 
-    const stack = d3
+    const stack = d3 // Generates a stack layout by checking each key in the object
       .stack<StackedDataPoint, string>()
       .keys(sortedMagCategories)
       .order(d3.stackOrderNone)
@@ -123,7 +128,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
 
     const stackedSeries = stack(stackedData);
 
-    const x = d3
+    const x = d3 // Determines the x position and width of each bar
       .scaleBand()
       .range([0, graphWidth])
       .domain(magnitudeData.map((d) => d.category))
@@ -161,29 +166,31 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       .style("color", "#757575");
 
     const getMagnitudeFromCategory = (category: string): number => {
-      if (category === '9+') return 9;
+      if (category === '6+') return 6;
       return parseFloat(category);
     };
 
     stackedSeries.forEach((series) => {
+      //
       const className = `mag_${series.key.replace(/[^a-zA-Z0-9]/g, '_')}`;
       svg
-        .selectAll(`rect.${className}`)
-        .data(series)
+        .selectAll(`rect.${className}`) // Creates class name for access
+        .data(series) // Binds the series data to the rectangles
         .join("rect")
         .attr("class", className)
         .attr("x", (d) => {
           const datum = d as d3.SeriesPoint<StackedDataPoint>;
-          return x(datum.data.date) || 0;
+          return x(datum.data.date) || 0; //
         })
         .attr("y", (d) => {
           const datum = d as d3.SeriesPoint<StackedDataPoint>;
-          return Math.min(y(datum[0]), y(datum[1]));
+          return Math.min(y(datum[0]), y(datum[1])); // datum[0] is count without this segment, [1] is with
+          // y(datum[x]) refers to the px distance from the top, so we want top of stack including this segment
         })
         .attr("width", x.bandwidth())
         .attr("height", (d) => {
           const datum = d as d3.SeriesPoint<StackedDataPoint>;
-          return Math.abs(y(datum[0]) - y(datum[1]));
+          return Math.abs(y(datum[0]) - y(datum[1])); // Linear scale value of difference in count
         })
         .attr("fill", () => getMagnitudeColorHex(getMagnitudeFromCategory(series.key)));
     });
@@ -196,12 +203,11 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
       .attr("class", "column-overlay")
       .attr("x", (d) => x(d.date) || 0)
       .attr("y", (d) => {
-        // y position is at the top of the stack (y(total))
+        // Y value at the top of the column
         return y(d.total);
       })
       .attr("width", x.bandwidth())
       .attr("height", (d) => {
-        // Height is from top of stack (y(total)) to bottom (y(0) = graphHeight)
         return graphHeight - y(d.total);
       })
       .attr("fill", "transparent")
@@ -212,7 +218,7 @@ const DateBarChart: React.FC<DateBarChartProps> = ({
         svg.selectAll("rect:not(.column-overlay)").filter(function() {
           const rectX = d3.select(this).attr("x");
           const overlayX = x(d.date) || 0;
-          return parseFloat(rectX) === overlayX;
+          return parseFloat(rectX) === overlayX;  // Filter all rect for ones with same x attr as current date
         }).attr("opacity", 0.8);
       })
       .on("mouseout", function (_event, d) {

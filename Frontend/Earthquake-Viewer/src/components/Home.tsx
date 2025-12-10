@@ -14,11 +14,14 @@ import {
 const Home = () => {
   const dispatch = useDispatch<AppDispatch>();
 
+  // Fetches all earthquakes in descending order by magnitude
   const { data, isLoading } = useQuery({
     queryKey: ['earthquakes'],
     queryFn: fetchEarthquakes,
   });
 
+
+  // Once the earthquakes are fetched, store them in the redux store for reducers to filter
   useEffect(() => {
     if (isLoading) return;
     if (data) {

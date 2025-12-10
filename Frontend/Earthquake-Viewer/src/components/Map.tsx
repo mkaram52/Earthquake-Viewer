@@ -37,9 +37,9 @@ const Map = () => {
 
 
   useEffect(() => {
-    // Set your Mapbox access token
-    mapboxgl.accessToken = 'pk.eyJ1IjoibWthcmFtNTM4IiwiYSI6ImNtaXFtdDBndzBvN3QzZW92a245ZGdlNmEifQ.r-vPjAr8m5NhvU31mBQl1A'
+    mapboxgl.accessToken = import.meta.env.VITE_MAPBOX_ACCESS_TOKEN;
 
+    // Initialize map with center at Pittsburgh
     if (!mapRef.current && mapContainerRef.current) {
       mapRef.current = new mapboxgl.Map({
         container: mapContainerRef.current,
@@ -53,6 +53,7 @@ const Map = () => {
       setMapLoaded(true);
     })
 
+    // Remove map on unmount to clean up ref
     return () => {
       mapRef.current?.remove();
       mapRef.current = null;
@@ -73,8 +74,12 @@ const Map = () => {
 
     const sw = bounds.getSouthWest();
     const ne = bounds.getNorthEast();
-    
-    // Normalize longitudes to -180 to 180 range
+
+    // When zoomed out, the map tends to determine its bounds from one edge to the other
+    // instead of from the center to the edges, so one point will be accurate
+    // while the other needs to be corrected.
+
+    // When degrees go past 180, they need to be measured in the other direction to remain consistent
     const normalizeLng = (lng: number): number => {
       while (lng < -180) lng += 360;
       while (lng > 180) lng -= 360;
@@ -97,17 +102,19 @@ const Map = () => {
     const swLng = normalizeLng(swLngRaw);
     const neLng = normalizeLng(neLngRaw);
 
-    // Ran into an issue where mapbox inaccurately defines its bounds when zoomed out
     const isPointInBounds = (lng: number, lat: number): boolean => {
       const normalizedLng = normalizeLng(lng);
 
+      // Latitudes were consistent in this map style, so check if eq latitude is out of bounds first
       if (lat < swLat || lat > neLat) {
         return false;
       }
 
+      // If eastern latitude is greater than western, the longitudes are correct and will be checked normally
       if (swLng <= neLng) {
         return normalizedLng >= swLng && normalizedLng <= neLng;
       } else {
+      // If not then the eastern side has wrapped around and now represents the western side
         return normalizedLng >= swLng || normalizedLng <= neLng;
       }
     };
@@ -120,6 +127,7 @@ const Map = () => {
     dispatch(stopFiltering());
   }, [filteredEarthquakes, dispatch]);
 
+  // Add on move end listener to trigger re-check of visible earthquakes
   useEffect(() => {
     if (!mapRef.current || !mapLoaded || !filteredEarthquakes) return;
 
@@ -137,6 +145,7 @@ const Map = () => {
     }
   }, [mapLoaded, filteredEarthquakes, checkVisibleMarkers])
 
+  // When a earthquake is selected, fly to it and zoom in. When unselected, fly back but keep center
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
 
@@ -150,6 +159,7 @@ const Map = () => {
     }
   },[selectedEarthquake])
 
+  // When the table is opened or closed, resize the map
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
     
@@ -160,6 +170,7 @@ const Map = () => {
     return () => clearTimeout(timeoutId);
   }, [isTableOpen, mapLoaded])
 
+  // When a country filter is selected, fly and zoom so the entirety of the country is in view
   useEffect(() => {
     if (!mapRef.current || !mapLoaded) return;
 
@@ -207,7 +218,7 @@ const Map = () => {
         transition="all 0.3s ease-in-out"
       >
         <div style={{ width: '100%', height: '100%' }} ref={mapContainerRef} />
-        <MapButtonMenu />
+        <MapButtonMenu /> {/* We reverse the list to put the first of whatever sort is current on top */}
         {mapLoaded && mapRef.current && [...inViewEarthquakes].reverse().map((eq) => (
           <Marker
             key={eq.earthquake_id}

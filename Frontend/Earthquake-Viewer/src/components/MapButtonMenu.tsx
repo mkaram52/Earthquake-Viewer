@@ -72,7 +72,7 @@ const MapButtonMenu = () => {
         boxShadow="lg"
       >
         <IconButton
-          aria-label="Menu option 1"
+          aria-label="Open List Table"
           onClick={() => handleSelectList()}
           size="md"
           variant="ghost"
@@ -85,7 +85,7 @@ const MapButtonMenu = () => {
           />
         </IconButton>
         <IconButton
-          aria-label="Filter Table"
+          aria-label="Open Filter Table"
           onClick={() => handleSelectFilter()}
           size="md"
           variant="ghost"
@@ -98,7 +98,7 @@ const MapButtonMenu = () => {
           />
         </IconButton>
         <IconButton
-          aria-label="Graph Table"
+          aria-label="Open Graph Table"
           onClick={() => handleSelectGraph()}
           size="md"
           variant="ghost"

@@ -102,7 +102,6 @@ const Marker: React.FC<MarkerProps> = ({
           onClick={() => handleSelectEarthquake(earthquake)}
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
-          className="rounded-full flex items-center justify-center cursor-pointer w-10 h-10"
           style={{
             backgroundColor: isHovered ? getMagnitudeColorHoverHex(earthquake.magnitude) : markerColor,
             borderRadius: '50%',

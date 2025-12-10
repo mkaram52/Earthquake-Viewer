@@ -31,10 +31,8 @@ const GraphList = () => {
   const country = useSelector(selectCountryHover);
   const global = useSelector(selectGlobal);
 
-  // TO-DO : Clean Up Hover Text styling
   const hoverText = useMemo(() => {
     if (magnitude) {
-      // return `Magnitude ${magnitude} - ${(magnitude || 0) + 1} : ${count} Earthquakes`;
       if (magnitude === 6) {
         return `${count} Earthquakes of ${magnitude}+ Magnitude`;
       }
@@ -51,6 +49,7 @@ const GraphList = () => {
     }
   }, [magnitude, count, inViewEarthquakes, filteredEarthquakes, global]);
 
+  // Add a resize listener to determine the width of the MapTable so that graphs can expand to fill
   useEffect(() => {
     if (!containerRef.current) return;
 
